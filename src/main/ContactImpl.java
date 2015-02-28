@@ -2,10 +2,15 @@ package main;
 
 /**
  * Implementation of interface {@see Contact}.
+ * This class does check the uniqueness of the ID. This has to be guaranteed by the class which issues
+ * the numbers, or by the class above that. This implementation just accepts any number given at construction
+ * time as final.
+ * 
+ * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
 public class ContactImpl implements Contact {
     private String name;
-    private final int id;  // TODO it has to be an unique id, need to create code to guarantee that.
+    private final int id;
     private String notes;
 
     /**

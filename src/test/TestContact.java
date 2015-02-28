@@ -11,10 +11,13 @@ import org.junit.rules.ExpectedException;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test class for interface {@see Contact}. It assumes an implementation named ContactImpl.
- * It does not test for the uniqueness of the Id, as this should be provided by the class in charge of issuing them,
- * or by the one above that. The Contact class accepts the id provided at construction time as final, without any
+ * JUnit test class for interface {@see Contact}. It assumes an implementation named ContactImpl.
+ *
+ * It does not test for the uniqueness of the ID, as this should be provided by the class in charge of issuing them,
+ * or by the one above that. The Contact class accepts the ID provided at construction time as final, without any
  * kind of checking. 
+ * 
+ * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
 public class TestContact {
     Contact foo;

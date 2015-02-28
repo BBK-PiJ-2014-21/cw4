@@ -1,6 +1,7 @@
 package test;
 
 import main.IdCreator;
+import main.IdCreatorImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -26,7 +27,7 @@ public class TestIdCreator {
         int[] array = createIdArray(100);
         for(int i=0; i<array.length; i++) {
             for(int j=i+1; j<array.length; j++) {
-                assertTrue("id at position " + i + "= id at position " + j, array[i]!=array[j]);
+                assertTrue("id at position " + i + "= id at position " + j, array[i] != array[j]);
             }
         }
     }
