@@ -1,15 +1,20 @@
 package test;
 
 import main.Contact;
+import main.ContactImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for interface {@see Contact}. It assumes an implementation named ContactImpl.
+ * It does not test for the uniqueness of the Id, as this should be provided by the class in charge of issuing them,
+ * or by the one above that. The Contact class accepts the id provided at construction time as final, without any
+ * kind of checking. 
  */
 public class TestContact {
     Contact foo;
@@ -27,6 +32,9 @@ public class TestContact {
         foo2 = null;
     }
 
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+    
     @Test
     public void testGetID() {
         assertEquals(foo.getId(), 012345);
@@ -55,6 +63,23 @@ public class TestContact {
         assertEquals(foo2.getNotes(), "Some notes about Foo2. More notes. Some more notes.");
     }
     
+    @Test
+    public void testNullNameShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        Contact nullName = new ContactImpl(null, 12345, "Notes");
+    }
+    
+    @Test
+    public void testNullNotesShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        Contact nullNotes = new ContactImpl("John", 9000, null);
+    }
+    
+    @Test
+    public void testAddNullNotesShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        foo.addNotes(null);
+    }
     
     
 }
