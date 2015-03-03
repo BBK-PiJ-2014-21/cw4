@@ -86,24 +86,35 @@ public class TestMeeting {
     
     @Test
     public void createMeetingShouldIgnoreDuplicateContacts() {
-        // TODO
+        contacts = createSetOfContactsMock(2);
+        contacts.add(createContactsMock("Contact1", 1, "Notes about Contact1"));
+        Meeting test = new MeetingImpl(date, contacts, 10);
+        assertEquals(test.getContacts().size(), 2);
     }
     
     @Test
     public void testGetId() {
-        // TODO
+        contacts = createSetOfContactsMock(10);
+        Meeting test = new MeetingImpl(date, contacts, 500);
+        assertEquals(test.getId(), 500);
     }
     
     @Test
     public void testGetDate() {
-        // TODO
+        contacts = createSetOfContactsMock(5);
+        Meeting test = new MeetingImpl(date, contacts, 200);
+        assertEquals(test.getDate().get(Calendar.DAY_OF_MONTH), 10);
     }
     
     @Test
     public void testGetContacts() {
-        // TODO
+        contacts = createSetOfContactsMock(2);
+        Meeting test = new MeetingImpl(date, contacts, 10);
+        Contact[] contactsArray = (Contact[]) test.getContacts().toArray();
+        assertEquals(contactsArray[1].getName(), "Contact2");
     }
     
+    // TODO more tests
     
 
 }
