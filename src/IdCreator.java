@@ -1,5 +1,3 @@
-package main;
-
 /**
  * Interface to issue unique IDs, created to support the implementation of {@see Contact}.
  * 

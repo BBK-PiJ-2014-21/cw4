@@ -1,7 +1,3 @@
-package main;
-
-import java.io.Serializable;
-
 /**
  * Implementation of {@see IdCreator}. 
  * It issues unique IDs, from 1000 upwards (to try and maintain a four-digits standard).

@@ -1,5 +1,3 @@
-package main;
-
 /**
  * Implementation of interface {@see Contact}.
  * This class does check the uniqueness of the ID. This has to be guaranteed by the class which issues

@@ -1,7 +1,3 @@
-package test;
-
-import main.Contact;
-import main.ContactImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

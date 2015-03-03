@@ -1,7 +1,3 @@
-package test;
-
-import main.IdCreator;
-import main.IdCreatorImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
