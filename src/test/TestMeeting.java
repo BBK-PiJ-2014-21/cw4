@@ -3,12 +3,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -30,13 +26,13 @@ public class TestMeeting {
     @Before
     public void setUp() {
         contacts = null;
-        date = null;
+        date = new GregorianCalendar(2015,10,21,10,15);
     }
     
     @After
     public void tearDown() {
         contacts = null;
-        date = new GregorianCalendar(2015,10,21,10,15);
+        date = null;
     }
     
     @Rule
@@ -51,9 +47,9 @@ public class TestMeeting {
     }
     
     public Set<Contact> createSetOfContactsMock(int n) {
-        Set<Contact> toReturn = new HashSet<Contact>();
-        while(n>0) {
-            toReturn.add(createContactsMock("Contact" + n, n, "Notes about Contact" + n));
+        Set<Contact> toReturn = new LinkedHashSet<Contact>();
+        for(int i=1; i<=n; i++) {
+            toReturn.add(createContactsMock("Contact" + i, i, "Notes about Contact" + i));
         }
         return toReturn;
     }
@@ -84,6 +80,10 @@ public class TestMeeting {
         assertEquals(test.getContacts().size(), 10);
     }
     
+    /*
+     * The class which implement the creation of the Set of Contacts/of a new Meeting should guarantee
+     * not to have duplicate Contacts in the Set. TODO move (and adjust) to the relevant test class once created.
+     * 
     @Test
     public void createMeetingShouldIgnoreDuplicateContacts() {
         contacts = createSetOfContactsMock(2);
@@ -91,6 +91,7 @@ public class TestMeeting {
         Meeting test = new MeetingImpl(date, contacts, 10);
         assertEquals(test.getContacts().size(), 2);
     }
+    */
     
     @Test
     public void testGetId() {
@@ -103,18 +104,17 @@ public class TestMeeting {
     public void testGetDate() {
         contacts = createSetOfContactsMock(5);
         Meeting test = new MeetingImpl(date, contacts, 200);
-        assertEquals(test.getDate().get(Calendar.DAY_OF_MONTH), 10);
+        assertEquals(test.getDate().get(Calendar.DAY_OF_MONTH), 21);
     }
     
     @Test
     public void testGetContacts() {
-        contacts = createSetOfContactsMock(2);
+        contacts = createSetOfContactsMock(5);
         Meeting test = new MeetingImpl(date, contacts, 10);
-        Contact[] contactsArray = (Contact[]) test.getContacts().toArray();
-        assertEquals(contactsArray[1].getName(), "Contact2");
+        Contact first = (Contact)test.getContacts().toArray()[0];
+        assertEquals(first.getName(), "Contact1");
+        assertEquals(first.getId(), 1);
+        assertEquals(first.getNotes(), "Notes about Contact1");
     }
-    
-    // TODO more tests
-    
 
 }
