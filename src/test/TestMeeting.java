@@ -117,4 +117,11 @@ public class TestMeeting {
         assertEquals(first.getNotes(), "Notes about Contact1");
     }
 
+    @Test
+    public void testCreateMeetingWithEmptySetOfContactsShouldThrowAnIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        Set<Contact> empty = new HashSet<Contact>();
+        Meeting test = new MeetingImpl(date, empty, 10);
+    }
+
 }
