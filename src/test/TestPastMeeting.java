@@ -3,7 +3,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.internal.matchers.Null;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -61,7 +60,6 @@ public class TestPastMeeting {
     @Test
     public void testEmptyContactSetShouldThrowIllegalArgumentException() {
         exception.expect(IllegalArgumentException.class);
-        contacts.add(createContactMock());
         PastMeeting empty = new PastMeetingImpl(date, contacts, 10);
     }
 
@@ -74,21 +72,22 @@ public class TestPastMeeting {
 
     @Test
     public void testGetNotesEmptyString() {
-        PastMeeting empty = new PastMeetingImpl(date, contacts, 10);
         contacts.add(createContactMock());
+        PastMeeting empty = new PastMeetingImpl(date, contacts, 10);
         assertEquals(empty.getNotes(), "");
     }
 
     @Test
     public void testGetNotes() {
-        PastMeeting test = new PastMeetingImpl(date, contacts, 10, "Notes about a past meeting");
         contacts.add(createContactMock());
+        PastMeeting test = new PastMeetingImpl(date, contacts, 10, "Notes about a past meeting");
         assertEquals(test.getNotes(), "Notes about a past meeting");
     }
 
     @Test
     public void testAddNotesGetNotes() {
-        PastMeeting test = new PastMeetingImpl(date, contacts, 10);
+        contacts.add(createContactMock());
+        PastMeetingImpl test = new PastMeetingImpl(date, contacts, 10);
         test.addNotes("Some notes");
         assertEquals(test.getNotes(), "Some notes");
     }
