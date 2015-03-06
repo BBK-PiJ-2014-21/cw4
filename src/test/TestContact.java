@@ -63,20 +63,20 @@ public class TestContact {
     }
     
     @Test
-    public void testNullNameShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
+    public void testNullNameShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
         Contact nullName = new ContactImpl(null, 12345, "Notes");
     }
     
     @Test
-    public void testNullNotesShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
+    public void testNullNotesShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
         Contact nullNotes = new ContactImpl("John", 9000, null);
     }
     
     @Test
-    public void testAddNullNotesShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
+    public void testAddNullNotesShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
         foo.addNotes(null);
     }
     

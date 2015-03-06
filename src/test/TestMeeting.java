@@ -55,14 +55,14 @@ public class TestMeeting {
     }
     
     @Test
-    public void createMeetingWithNullDateShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
+    public void createMeetingWithNullDateShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
         Meeting nullDate = new MeetingImpl(null, contacts, 3);
     }
     
     @Test
-    public void createMeetingWithNullContactsShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
+    public void createMeetingWithNullContactsShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
         Meeting nullContacts = new MeetingImpl(date, null, 10);
     }
     
