@@ -15,7 +15,7 @@ public class MeetingImpl implements Meeting {
     private final int id;
     
     public MeetingImpl(Calendar date, Set<Contact> contacts, int id) {
-        if(contacts.isEmpty()) {
+        if(contacts == null || contacts.isEmpty()) {
             throw new IllegalArgumentException("The list must contain a minimum of one contact");
         }
         this.date = date;
@@ -26,7 +26,7 @@ public class MeetingImpl implements Meeting {
     public int getId() {
         return id;
     }
-    
+
     public Calendar getDate() {
         return date;
     }
