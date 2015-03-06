@@ -108,13 +108,30 @@ public class TestMeeting {
     }
     
     @Test
-    public void testGetContacts() {
+    public void testGetContactsFirstContact() {
         contacts = createSetOfContactsMock(5);
         Meeting test = new MeetingImpl(date, contacts, 10);
         Contact first = (Contact)test.getContacts().toArray()[0];
         assertEquals(first.getName(), "Contact1");
         assertEquals(first.getId(), 1);
         assertEquals(first.getNotes(), "Notes about Contact1");
+    }
+
+    @Test
+    public void testGetContactsLastContact() {
+        contacts = createSetOfContactsMock(10);
+        Meeting test = new MeetingImpl(date, contacts, 100);
+        Contact last = (Contact)test.getContacts().toArray()[9];
+        assertEquals(last.getName(), "Contact10");
+        assertEquals(last.getId(), 10);
+        assertEquals(last.getNotes(), "Notes about Contact10");
+    }
+
+    @Test
+    public void testGetContactSetSize() {
+        contacts = createSetOfContactsMock(100);
+        Meeting test = new MeetingImpl(date, contacts, 3);
+        assertEquals(test.getContacts().size(), 100);
     }
 
     @Test
