@@ -17,13 +17,13 @@ public class ContactImpl implements Contact {
      * @param name the name of the contact.
      * @param id the unique id of the contact.
      * @param notes the notes about the contact.
-     * @throws IllegalArgumentException if name or notes are null.              
+     * @throws NullPointerException if name or notes are null.
      */
     public ContactImpl(String name, int id, String notes) {
         if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
+            throw new NullPointerException("Name cannot be null");
         } else if (notes == null) {
-            throw new IllegalArgumentException("Notes cannot be null");
+            throw new NullPointerException("Notes cannot be null");
         } else {
             this.name = name;
             this.id = id;
@@ -36,11 +36,11 @@ public class ContactImpl implements Contact {
      *  
      * @param name the name of the contact.
      * @param id the unique id of the contact.
-     * @throws IllegalArgumentException if name is null.           
+     * @throws NullPointerException if name is null.
      */
     public ContactImpl(String name, int id) {
         if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
+            throw new NullPointerException("Name cannot be null");
         } else {
             this.name = name;
             this.id = id;
@@ -82,12 +82,12 @@ public class ContactImpl implements Contact {
      * {@inheritDoc}
      *
      * @param notes the notes about the contact to be added.
-     * @throws IllegalArgumentException if notes is null.              
+     * @throws NullPointerException if notes is null.
      */
     @Override
     public void addNotes(String notes) {
         if (notes == null) {
-            throw new IllegalArgumentException("Notes cannot be null");
+            throw new NullPointerException("Notes cannot be null");
         } else {
             if (this.notes.equals("")) {
                 this.notes = notes;
