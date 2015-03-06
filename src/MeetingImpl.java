@@ -24,7 +24,9 @@ public class MeetingImpl implements Meeting {
      * @throws IllegalArgumentException if the list of contacts is empty
      */
     public MeetingImpl(Calendar date, Set<Contact> contacts, int id) {
-        if(contacts == null) {
+        if(date == null) {
+            throw new NullPointerException("Date cannot be null");
+        } else if(contacts == null) {
             throw new NullPointerException("Set<Contact> cannot be null");
         } else if(contacts.isEmpty()) {
             throw new IllegalArgumentException("Set<Contact> must contain a minimum of one contact");
