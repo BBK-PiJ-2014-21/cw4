@@ -3,14 +3,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.internal.matchers.Null;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -29,7 +26,7 @@ public class TestContactManager {
     }
 
     @Rule
-    ExpectedException exception = ExpectedException.none();
+    public ExpectedException exception = ExpectedException.none();
 
     public void addContacts(int n) {
         for (int i = 1; i <=n; i++) {
@@ -38,7 +35,7 @@ public class TestContactManager {
     }
 
     public void addContactsSmith(int n) {
-        for (int i = 1; i<n; i++) {
+        for (int i = 1; i<=n; i++) {
             test.addNewContact("Smith", "Notes about Smith" + "(" + i + ")");
         }
     }
@@ -66,7 +63,7 @@ public class TestContactManager {
     public void testAddNewContactsShouldGetTheSameOneBothByNameAndId() {
         addContacts(10);
         Set<Contact> byNameshouldBeSize1 = test.getContacts("Contact1");
-        assertEquals(byNameshouldBeSize1.size(), 1);
+        assertEquals(byNameshouldBeSize1.size(), 2);
         Contact first = (Contact)byNameshouldBeSize1.toArray()[0];
         Set<Contact> byIDshouldBeSize1 = test.getContacts(first.getId());
         Contact firstcopy = (Contact)byIDshouldBeSize1.toArray()[0];
@@ -78,7 +75,7 @@ public class TestContactManager {
         test.addNewContact("Contact1", "Notes about Contact1");
         test.addNewContact("Contact2", "Notes about Contact2");
         int id1 = ((Contact)test.getContacts("Contact1").toArray()[0]).getId();
-        int id2 = ((Contact)test.getContacts("Contact2").toArray()[1]).getId();
+        int id2 = ((Contact)test.getContacts("Contact2").toArray()[0]).getId();
         assertNotEquals(id1, id2);
     }
 
@@ -107,45 +104,58 @@ public class TestContactManager {
     public void testAddMoreNewContactsWhoseNameContainsSameStringGetByNameCheckAllIDsAreUnique() {
         addContacts(10);
         addContacts(10);
-        Contact[] list = (Contact[])test.getContacts("Contact").toArray();
-        for(int i=0; i<list.length; i++) {
-            for(int j=i+1; j<list.length; j++) {
-                assertNotEquals(list[i].getId(), list[j].getId());
+        Set<Contact> list = test.getContacts("Contact");
+        assertEquals(list.size(), 20);
+        Contact[] contacts = test.getContacts("Contact").toArray(new Contact[list.size()]);
+        for(int i=0; i<contacts.length; i++) {
+            for(int j=i+1; j<contacts.length; j++) {
+                assertNotEquals(contacts[i].getId(), contacts[j].getId());
             }
         }
     }
 
     @Test
-    public void testAddMoreContactsWithSomeDifferentSomeSameNameCombineSetsAndCheckAllIDsAreUnique() {
+    public void testAddMoreContactsWithSomeDifferentSomeSameNameMergeSetsAndCheckAllIDsAreUnique() {
         addContacts(5);
         addContactsSmith(5);
         Set<Contact> different = test.getContacts("Contact");
         Set<Contact> same = test.getContacts("Smith");
-        Set<Contact> all = new HashSet<Contact>();
-        all.addAll(different);
-        all.addAll(same);
-        Contact[] list = (Contact[])all.toArray();
-        for(int i = 0; i < list.length; i++) {
-            for(int j = i+1; i < list.length; i++) {
-                assertNotEquals(list[i].getId(), list[j].getId());
+        Set<Contact> merged = new HashSet<Contact>();
+        merged.addAll(same);
+        merged.addAll(different);
+        Contact[] mergedArray = merged.toArray(new Contact[merged.size()]);
+        for (int i = 0; i < mergedArray.length; i++) {
+            for (int j = 0; i < mergedArray.length; i++) {
+                if (i == j) {
+                    continue;
+                }
+                assertTrue(mergedArray[i] != mergedArray[j]);
             }
         }
     }
 
     @Test
-    public void testAddMoreNewContactsWhoseNameIsSameStringGetByNameCheckAllIDsAreUnique() {
+    public void testAddMoreNewContactsWhoseNameIsSameStringGetByNameMergeSetsAndCheckAllIDsAreUnique() {
         addContactsSmith(10);
+        Set<Contact> list1 = test.getContacts("Smith");
         addContactsSmith(5);
-        Contact[] list = (Contact[])test.getContacts("Smith").toArray();
-        for(int i=0; i<list.length; i++) {
-            for(int j=i+1; j<list.length; j++) {
-                assertNotEquals(list[i].getId(), list[j].getId());
+        Set<Contact> list2 = test.getContacts("Smith");
+        Set<Contact> merged = new HashSet<Contact>();
+        merged.addAll(list1);
+        merged.addAll(list2);
+        Contact[] arrayList = merged.toArray(new Contact[merged.size()]);
+        for(int i=0; i<arrayList.length; i++) {
+            for(int j=0; j<arrayList.length; j++) {
+                if(i==j) {
+                    continue;
+                }
+                assertNotEquals(arrayList[i].getId(), arrayList[j].getId());
             }
         }
     }
 
     @Test
-    public void testAddMoreNewContactsGetAllContactsByNameAndByArrayOfIDsCompareSets() {
+    public void testAddMoreNewContactsGetAllContactsByNameAndByArrayOfIDsCompareSetsSize() {
         addContacts(5);
         Set<Contact> listByName = test.getContacts("Contact");
         int[] IDs = new int[listByName.size()];
@@ -162,8 +172,11 @@ public class TestContactManager {
     public void testAddOneNewContactGetContactByIdOneValidOneNotCorresponding() {
         exception.expect(IllegalArgumentException.class);
         addContacts(1);
-        int validID = ((Contact[])test.getContacts("Contact1").toArray())[0].getId();
-        test.getContacts(validID, 12312);
+        Set<Contact> list = test.getContacts("Contact1");
+        assertEquals(list.size(), 1);
+        Contact first = (Contact)list.toArray()[0];
+        int validID = first.getId();
+        test.getContacts(validID, 1231);
     }
 
     @Test
@@ -173,20 +186,22 @@ public class TestContactManager {
     }
 
     @Test
+    public void testGetContactByIdOnEmptyListShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        test.getContacts(100);
+    }
+
+    @Test
     public void testGetContactNullShouldThrowNullPointerException() {
         exception.expect(NullPointerException.class);
         String nullString = null;
         test.getContacts(nullString);
     }
 
-    /**
-     * IllegalArgumentException for a getName(String) not matching with the list of Contacts created
-     * is not a requirement in the interface.
-     */
     @Test
-    public void testGetContactNameNotInTheListShouldThrowIllegalArgumentException() {
-        exception.expect(IllegalArgumentException.class);
-        test.getContacts("Name not in the list");
+    public void testGetContactNameNotInTheListShouldReturnAnEmptySet() {
+        Set<Contact> empty = test.getContacts("Name not in the list");
+        assertEquals(empty.size(), 0);
     }
 
 
