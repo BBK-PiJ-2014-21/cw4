@@ -3,9 +3,7 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * JUnit test class for interface {@see IdCreator}. It assumes an implementation called IdCreatorImpl.
@@ -27,7 +25,10 @@ public class TestIdCreator {
     public void test100ContactIDsAreUnique() {
         int[] array = createIdArray(100);
         for(int i=0; i<array.length; i++) {
-            for(int j=i+1; j<array.length; j++) {
+            for(int j=0; j<array.length; j++) {
+                if(i==j) {
+                    continue;
+                }
                 assertTrue("id at position " + i + "= id at position " + j, array[i] != array[j]);
             }
         }
