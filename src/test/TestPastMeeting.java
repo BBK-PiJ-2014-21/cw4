@@ -92,6 +92,14 @@ public class TestPastMeeting {
         assertEquals(test.getNotes(), "Some notes");
     }
 
+    @Test
+    public void createPastMeetingWithFutureDateShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        contacts.add(createContactMock());
+        date = new GregorianCalendar(2017, 2, 7, 20, 00);
+        Meeting futureDate =  new PastMeetingImpl(date, contacts, 10);
+    }
+
 
 
 }
