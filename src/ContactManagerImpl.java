@@ -8,6 +8,8 @@ import java.util.*;
 public class ContactManagerImpl implements ContactManager {
     private IdCreatorImpl IdCreator;
     private Set<Contact> contactSet;
+    private List<Meeting> meetings;
+    private List<FutureMeeting> futureMeetings;
 
     /**
      *
@@ -15,18 +17,39 @@ public class ContactManagerImpl implements ContactManager {
     public ContactManagerImpl() {
         IdCreator = new IdCreatorImpl();
         contactSet = new LinkedHashSet<Contact>();
+        meetings = new ArrayList<Meeting>();
+        futureMeetings = new ArrayList<FutureMeeting>();
     }
 
     /**
+     * {@inheritDoc}
      *
+     * This implementation consider a contact unknown/non-existent if it doesn't belong to the set contactSet.
+     * This means that the set of contacts passed as argument has to be retrieved from a method call
+     * getContacts(String name) or getContacts(int... ids). A set created object of type Contact with an existent and
+     * matching id, name and notes
      *
      * @param contacts a list of contacts that will participate in the meeting
      * @param date     the date of which the meeting will take place
-     * @return
+     * @return the ID for the meeting
+     * @throws IllegalArgumentException if the meeting is set for a time in the past,
+     *     or if any contact is unknown / non-existent
      */
     @Override
     public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
-        return -1; // TODO
+        if(contacts == null || date == null) {
+            throw new NullPointerException("Argument cannot be null");
+        } else if(!checkContacts(contacts)) {
+            throw new IllegalArgumentException("All the contacts for the meeting need to be valid");
+        } else if(date.before(Calendar.getInstance())) {
+            throw new IllegalArgumentException("Cannot create a FutureMeeting with a past date");
+        } else {
+            int id = IdCreator.createMeetingId();
+            Meeting meeting = new FutureMeetingImpl(date, contacts, id);
+            futureMeetings.add((FutureMeeting)meeting);
+            meetings.add(meeting);
+            return id;
+        }
     }
 
     /**
@@ -41,25 +64,37 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     *
+     * {@inheritDoc}
      *
      * @param id the ID for the meeting
-     * @return
+     * @return the meeting with the requested ID, or null if there is none.
+     * @throws IllegalArgumentException if there is a meeting with that ID happening in the past
      */
     @Override
     public FutureMeeting getFutureMeeting(int id) {
-        return null; // TODO
+        // TODO if(id is in PastMeetingList throw exception)
+        for(FutureMeeting m : futureMeetings) {
+            if(m.getId()==id) {
+                return m;
+            }
+        }
+        return null;
     }
 
     /**
-     *
+     * {@inheritDoc}
      *
      * @param id the ID for the meeting
-     * @return
+     * @return the meeting with the requested ID, or null if it there is none.
      */
     @Override
     public Meeting getMeeting(int id) {
-        return null; // TODO
+        for(Meeting m : meetings) {
+            if(m.getId()==id) {
+                return m;
+            }
+        }
+        return null;
     }
 
     /**
@@ -190,6 +225,15 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public void flush() {
         // TODO
+    }
+
+    public boolean checkContacts(Set<Contact> toCheck) {
+        for(Contact c : toCheck) {
+            if(!contactSet.contains(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
