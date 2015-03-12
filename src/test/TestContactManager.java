@@ -32,12 +32,24 @@ public class TestContactManager {
 
     // testing addNewContact() and getContacts()   -----------------------------------------------------
 
+    /**
+     * This method is used in following tests to create n valid contacts and add them to
+     * the ContactManager list
+     *
+     * @param n the number of contacts to be added to the list.
+     */
     public void addContacts(int n) {
         for (int i = 1; i <=n; i++) {
             test.addNewContact("Contact" + i, "Notes about Contact" + i);
         }
     }
 
+    /**
+     * This method is used in following tests to create n valid contacts with same name
+     * and add them to the ContactManager list
+     *
+     * @param n the number of contacts to be added to the list.
+     */
     public void addContactsSmith(int n) {
         for (int i = 1; i<=n; i++) {
             test.addNewContact("Smith", "Notes about Smith" + "(" + i + ")");
@@ -210,6 +222,13 @@ public class TestContactManager {
 
     // testing addFutureMeeting(), getFutureMeeting(), getMeeting() ------------------------------------
 
+    /**
+     * This method is used in some following tests to create a Set of n contacts none of which
+     * is added to the ContactManager list.
+     *
+     * @param n number of contacts to add to the Set.
+     * @return the Set of invalid (unknown) contacts.
+     */
     public Set<Contact> createUnknownSetOfContacts(int n) {
         Set<Contact> contacts = new HashSet<Contact>();
         while(n>0) {
@@ -220,11 +239,21 @@ public class TestContactManager {
         return contacts;
     }
 
+    /**
+     * This method is used in following tests to quickly get a Calendar instance of a future date
+     *
+     * @return a future date.
+     */
     public Calendar getFutureDate() {
         Calendar date = new GregorianCalendar(3015, 12, 12, 12, 12);
         return date;
     }
 
+    /**
+     * This method is used in following tests to quickly get a Calendar instance of a past date
+     *
+     * @return a past date.
+     */
     public Calendar getPastDate() {
         Calendar date = new GregorianCalendar(2001, 12, 12, 12, 12);
         return date;
@@ -336,6 +365,13 @@ public class TestContactManager {
 
     // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
 
+    /**
+     * This method is used in various following tests to avoid code repetition.
+     * It adds a new contact with name "Valid" to the test ContactManager list of contacts,
+     * and returns it via the Set<Contacts> of method getContacts().
+     *
+     * @return the contact added to the ContactManger.
+     */
     public Contact addContactgetContact() {
         test.addNewContact("Valid", "Notes");
         Set<Contact> validSet = test.getContacts("Valid");
@@ -365,15 +401,15 @@ public class TestContactManager {
     @Test
     public void getFutureMeetingListWithValidContactOneMeetingScheduledShouldReturnIt() {
         Contact valid = addContactgetContact();
-        test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        int meetingId = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
         assertEquals(test.getFutureMeetingList(valid).size(), 1);
-        assertEquals(test.getFutureMeetingList(valid).get(0), valid);
+        assertEquals(test.getFutureMeetingList(valid).get(0).getId(), meetingId);
     }
 
     @Test
     public void getFutureMeetingListWithValidContactFewMeetingScheduledShouldReturnThemSorted() {
         Contact valid = addContactgetContact();
-        int third = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        int third = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());  // it is year 3015
         int first = test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2018, 6, 4, 16, 30));
         int second = test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2020, 12, 12, 13, 13));
         List<Meeting> list = test.getFutureMeetingList(valid);
@@ -385,22 +421,24 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingListWithValidContactFewMeetingsShouldReturnAListWithNoDuplicates() {
-     // TODO (should implement control over same contacts and date meetings?)
+     // TODO (should implement control over same contacts and date meetings? Probably not.)
     }
 
     @Test
     public void getFutureMeetingListWithNullDateShouldThrowNullPointerException() {
-        // TODO
+        exception.expect(NullPointerException.class);
+        Calendar nullDate = null;
+        test.getFutureMeetingList(nullDate);
     }
 
     @Test
     public void getFutureMeetingListWithPastDateNoMeetingsMatchingShouldReturnAnEmptyList() {
-        // TODO
+        assertTrue(test.getFutureMeetingList(getPastDate()).isEmpty());
     }
 
     @Test
     public void getFutureMeetingListWithFutureDateNoMeetingsMatchingShouldReturnAnEmptyList() {
-        // TODO
+        assertTrue(test.getFutureMeetingList(getFutureDate()).isEmpty());
     }
 
     @Test
@@ -415,25 +453,44 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingListWithFutureDateOneMeetingsMatchingShouldReturnIt() {
-        Contact valid = addContactgetContact();
+        addContactgetContact();
         int id = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
         List<Meeting> list = test.getFutureMeetingList(getFutureDate());
         assertEquals(list.get(0).getId(), id);
     }
 
     @Test
-    public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldReturnThemSorted() {
-        // TODO
+    public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldReturnThemSortedByTime() {
+        // three same dates, different times to be added to three meetings
+        Calendar date1 = new GregorianCalendar(2018, 10, 10, 10, 10);
+        Calendar date2 = new GregorianCalendar(2018, 10, 10, 10, 30);
+        Calendar date3 = new GregorianCalendar(2018, 10, 10, 20, 20);
+        // the date to use as parameter of getting the list of future meetings
+        Calendar param = Calendar.getInstance();
+        param.set(2018, 10, 10);
+        // add new three meetings via different ways (one through id, few with same name, few with different names)
+        Contact valid = addContactgetContact();
+        int validID = valid.getId();
+        addContactsSmith(10);
+        addContacts(3);
+        int second = test.addFutureMeeting(test.getContacts("Valid"), date2);
+        int third = test.addFutureMeeting(test.getContacts("Cont"), date3);
+        int first = test.addFutureMeeting(test.getContacts(validID), date1);
+        List<Meeting> meetings = test.getFutureMeetingList(param);
+        assertEquals(meetings.size(), 3);
+        assertEquals(meetings.get(0).getId(), first);
+        assertEquals(meetings.get(1).getId(), second);
+        assertEquals(meetings.get(2).getId(), third);
     }
 
     @Test
     public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldHaveNoDuplicates() {
-        // TODO
+        // TODO (should implement control over same contacts and date meetings? Probably not.)
     }
 
     @Test
     public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldHaveNoDuplicates() {
-        // TODO
+        // TODO (should implement control over same contacts and date meetings? Probably not.)
     }
 
     @Test
