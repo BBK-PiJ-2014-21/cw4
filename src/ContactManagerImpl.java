@@ -24,10 +24,11 @@ public class ContactManagerImpl implements ContactManager {
     /**
      * {@inheritDoc}
      *
-     * This implementation consider a contact unknown/non-existent if it doesn't belong to the set contactSet.
-     * This means that the set of contacts passed as argument has to be retrieved from a method call
-     * getContacts(String name) or getContacts(int... ids). A set created object of type Contact with an existent and
-     * matching id, name and notes
+     * This implementation considers a contact unknown if it doesn't belong to the set contactSet.
+     * This means that the set of contacts passed as argument should to be retrieved from a method call
+     * getContacts(String name) or getContacts(int... ids). In other words, a set containing objects of type
+     * Contact with a valid id, name and notes will still not be considered valid unless the same objects
+     * are contained in contactSet.
      *
      * @param contacts a list of contacts that will participate in the meeting
      * @param date     the date of which the meeting will take place
@@ -98,14 +99,32 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
+     * {@inheritDoc}
      *
+     * This implementation considers a contact unknown if the object is not contained into the set contactSet.
+     * That is, a Contact object with matching name, id and notes passed as parameter would still throw an
+     * exception if it is not a reference of the corresponding Contact in contactSet.
      *
      * @param contact one of the user's contacts
-     * @return
+     * @return the list of future meeting(s) scheduled with this contact (maybe empty).
+     * @throws IllegalArgumentException if the contact does not exist.
      */
     @Override
     public List<Meeting> getFutureMeetingList(Contact contact) {
-        return null; // TODO
+        if(contact == null) {
+            throw new NullPointerException("Cannot have a null contact");
+        } else if(!contactSet.contains(contact)) {
+            throw new IllegalArgumentException("The contact doesn't belong to contactSet");
+        } else {
+            List<Meeting> list = new LinkedList<>();
+            for (FutureMeeting f : futureMeetings) {
+                if(f.getContacts().contains(contact)) {
+                    list.add(f);
+                }
+            }
+            list.sort((meeting1, meeting2) -> meeting1.getDate().compareTo(meeting2.getDate()));
+            return list;
+        }
     }
 
     /**
