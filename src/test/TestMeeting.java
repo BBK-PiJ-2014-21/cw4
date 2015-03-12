@@ -80,19 +80,6 @@ public class TestMeeting {
         assertEquals(test.getContacts().size(), 10);
     }
     
-    /*
-     * The class which implement the creation of the Set of Contacts/of a new Meeting should guarantee
-     * not to have duplicate Contacts in the Set. TODO move (and adjust) to the relevant test class once created.
-     * 
-    @Test
-    public void createMeetingShouldIgnoreDuplicateContacts() {
-        contacts = createSetOfContactsMock(2);
-        contacts.add(createContactsMock("Contact1", 1, "Notes about Contact1"));
-        Meeting test = new MeetingImpl(date, contacts, 10);
-        assertEquals(test.getContacts().size(), 2);
-    }
-    */
-    
     @Test
     public void testGetId() {
         contacts = createSetOfContactsMock(10);
