@@ -5,15 +5,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 /**
+ * JUnit test class for interface {@see ContactManager}. It assumes an implementation called ContactManagerImpl.
  *
+ * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
 public class TestContactManager {
     private ContactManager test;
@@ -251,11 +250,6 @@ public class TestContactManager {
     }
 
     @Test
-    public void addFutureMeetingWithMatchingContactNotRetrievedFromGetContactsSHOULDDOWHAT() {
-        // TODO
-    }
-
-    @Test
     public void addFutureMeetingWithSomeKnownSomeUnknownContactsShouldThrowIllegalArgumentException() {
         exception.expect(IllegalArgumentException.class);
         Set<Contact> mixed = new HashSet<Contact>();
@@ -328,11 +322,196 @@ public class TestContactManager {
     }
 
     @Test
-    public void getFutureMeetingWithPastMeetingIdShouldThrowIllegalArgumentException() {
+    public void addFutureMeetingWithMatchingContactNotRetrievedFromGetContactsShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        test.addNewContact("Valid", "Notes");
+        Set<Contact> validSet = test.getContacts("Valid");
+        Contact validContact = validSet.toArray(new Contact[validSet.size()])[0];
+        int validID = validContact.getId();
+        Set<Contact> invalidSet = new HashSet<Contact>();
+        Contact invalidContact = new ContactImpl("Valid", validID, "Notes");
+        invalidSet.add(invalidContact);
+        test.addFutureMeeting(invalidSet, getFutureDate());
+    }
+
+    // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
+
+    public Contact addContactgetContact() {
+        test.addNewContact("Valid", "Notes");
+        Set<Contact> validSet = test.getContacts("Valid");
+        return validSet.toArray(new Contact[validSet.size()])[0];
+    }
+
+    @Test
+    public void getFutureMeetingListWithNullContactsShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
+        Contact nullContact = null;
+        test.getFutureMeetingList(nullContact);
+    }
+
+    @Test
+    public void getFutureMeetingListWithNonExistentContactShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        Contact notRegistered = new ContactImpl("Not valid", 10);
+        test.getFutureMeetingList(notRegistered);
+    }
+
+    @Test
+    public void getFutureMeetingListWithValidContactButNoMeetingScheduledShouldReturnAnEmptyList() {
+        Contact valid = addContactgetContact();
+        assertTrue(test.getFutureMeetingList(valid).isEmpty());
+    }
+
+    @Test
+    public void getFutureMeetingListWithValidContactOneMeetingScheduledShouldReturnIt() {
+        Contact valid = addContactgetContact();
+        test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        assertEquals(test.getFutureMeetingList(valid).size(), 1);
+        assertEquals(test.getFutureMeetingList(valid).get(0), valid);
+    }
+
+    @Test
+    public void getFutureMeetingListWithValidContactFewMeetingScheduledShouldReturnThemSorted() {
+        Contact valid = addContactgetContact();
+        int third = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        int first = test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2018, 6, 4, 16, 30));
+        int second = test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2020, 12, 12, 13, 13));
+        List<Meeting> list = test.getFutureMeetingList(valid);
+        assertEquals(list.size(), 3);
+        assertEquals(list.get(0).getId(), first);
+        assertEquals(list.get(1).getId(), second);
+        assertEquals(list.get(2).getId(), third);
+    }
+
+    @Test
+    public void getFutureMeetingListWithValidContactFewMeetingsShouldReturnAListWithNoDuplicates() {
+     // TODO (should implement control over same contacts and date meetings?)
+    }
+
+    @Test
+    public void getFutureMeetingListWithNullDateShouldThrowNullPointerException() {
+        // TODO
+    }
+
+    @Test
+    public void getFutureMeetingListWithPastDateNoMeetingsMatchingShouldReturnAnEmptyList() {
+        // TODO
+    }
+
+    @Test
+    public void getFutureMeetingListWithFutureDateNoMeetingsMatchingShouldReturnAnEmptyList() {
+        // TODO
+    }
+
+    @Test
+    public void getFutureMeetingListWithPastDateOneMeetingMatchingShouldReturnIt() {
+       // TODO (need addNewPastMeeting to be tested)
+    }
+
+    @Test
+    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldReturnThemSorted() {
+        // TODO (need addNewPastMeeting to be tested)
+    }
+
+    @Test
+    public void getFutureMeetingListWithFutureDateOneMeetingsMatchingShouldReturnIt() {
+        Contact valid = addContactgetContact();
+        int id = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        List<Meeting> list = test.getFutureMeetingList(getFutureDate());
+        assertEquals(list.get(0).getId(), id);
+    }
+
+    @Test
+    public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldReturnThemSorted() {
+        // TODO
+    }
+
+    @Test
+    public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldHaveNoDuplicates() {
+        // TODO
+    }
+
+    @Test
+    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldHaveNoDuplicates() {
+        // TODO
+    }
+
+    @Test
+    public void getPastMeetingListWithNullContactShouldThrowNullPointerException() {
+        // TODO
+    }
+
+    @Test
+    public void getPastMeetingListWithNonExistentContactShouldThrowIllegalArgumentException() {
+        // TODO
+    }
+
+    @Test
+    public void getPastMeetingWithValidContactNoMeetingsShouldReturnAnEmptyList() {
+        // TODO
+    }
+
+    @Test
+    public void getPastMeetingWithValidContactOneMeetingShouldReturnIt() {
+        // TODO
+    }
+
+    @Test
+    public void getPastMeetingWithValidContactFewMeetingsShouldReturnThemSorted() {
         // TODO
     }
 
 
+
+    // TODO testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
+
+    @Test
+    public void getFutureMeetingWithPastMeetingIdShouldThrowIllegalArgumentException() {
+    }
+
+    @Test
+    public void convertFutureMeetingToPastMeetingCompareWithMeeting() {
+    }
+
+    @Test
+    public void addNewPastMeetingWithNullContactsShouldThrowNullPointerException() {
+
+    }
+
+    @Test
+    public void addNewPastMeetingWithNullDateShouldThrowNullPointerException() {
+
+    }
+
+    @Test
+    public void addNewPastMeetingWithNullTextShouldThrowNullPointerException() {
+
+    }
+
+    @Test
+    public void addNewPastMeetingWithEmptyContactSetShouldThrowIllegalArgumentException() {
+
+    }
+
+    @Test
+    public void addNewPastMeetingWithNonExistentContactsShouldThrowIllegalArgumentException() {
+
+    }
+
+    @Test
+    public void addNewPastMeetingWithASetOfSomeExistentSomeNonExistentContactsShouldThrowIllegalArgumentException() {
+
+    }
+
+    @Test
+    public void getPastMeetingWithIdOfAFutureMeetingShouldThrowIllegalArgumentException() {
+
+    }
+
+    @Test
+    public void getPastMeetingWithNonExistentIdShouldReturnNull() {
+
+    }
 
 
 }
