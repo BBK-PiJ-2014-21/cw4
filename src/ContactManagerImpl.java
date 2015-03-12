@@ -122,20 +122,73 @@ public class ContactManagerImpl implements ContactManager {
                     list.add(f);
                 }
             }
-            list.sort((meeting1, meeting2) -> meeting1.getDate().compareTo(meeting2.getDate()));
+            sortMeetingsDate(list);
             return list;
         }
     }
 
     /**
+     * {@inheritDoc}
      *
+     * The parameter date will use only the date part (year, month and day) and ignore the time.
+     *
+     * Returns the list of meetings that are scheduled for, or that took
+     * place on, the specified date
+     *
+     * If there are none, the returned list will be empty. Otherwise,
+     * the list will be chronologically sorted and will not contain any
+     * duplicates.
      *
      * @param date the date
-     * @return
+     * @return the list of meetings
      */
     @Override
     public List<Meeting> getFutureMeetingList(Calendar date) {
-        return null; // TODO
+        if (date == null) {
+            throw new NullPointerException("Cannot have a null date");
+        } else {
+            List<Meeting> list = new LinkedList<>();
+            if (date.after(Calendar.getInstance())) {
+                for (FutureMeeting f : futureMeetings) {
+                    if (sameDate(f.getDate(), date)) {
+                        list.add(f);
+                    }
+                }
+            } else {
+                // TODO deal with pastMeetings
+            }
+            sortMeetingsDate(list);
+            return list;
+        }
+    }
+
+    /**
+     * Sort a list of Meetings by date and time
+     *
+     * @param list the list to be sorted.
+     */
+    private void sortMeetingsDate(List<Meeting> list) {
+        list.sort((date1, date2) -> date1.getDate().compareTo(date2.getDate()));
+    }
+
+    /**
+     * Compare the date (year, month, day) of two Calendar instances,
+     * without checking the time, and return whether the three fields are equals
+     * (i.e. if the two dates are the same, regardless of the time)
+     *
+     * @param date1 a Calendar date.
+     * @param date2 a Calendar date.
+     * @return true if the two dates are equals (in terms of year, month and day), false otherwise.
+     */
+    private boolean sameDate(Calendar date1, Calendar date2) {
+        if (date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)) {
+            if (date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)) {
+                if (date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
