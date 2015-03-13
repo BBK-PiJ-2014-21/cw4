@@ -536,32 +536,54 @@ public class TestContactManager {
 
     @Test
     public void addNewPastMeetingWithNullContactsShouldThrowNullPointerException() {
-        // TODO
+        exception.expect(NullPointerException.class);
+        test.addNewPastMeeting(null, getPastDate(), "Notes");
     }
 
     @Test
     public void addNewPastMeetingWithNullDateShouldThrowNullPointerException() {
-        // TODO
+        exception.expect(NullPointerException.class);
+        addContacts(3);
+        test.addNewPastMeeting(test.getContacts("Contact"), null, "Notes");
     }
 
     @Test
     public void addNewPastMeetingWithNullTextShouldThrowNullPointerException() {
-        // TODO
+        exception.expect(NullPointerException.class);
+        addContactsSmith(1);
+        test.addNewPastMeeting(test.getContacts("Smith"), getPastDate(), null);
     }
 
     @Test
     public void addNewPastMeetingWithEmptyContactSetShouldThrowIllegalArgumentException() {
-        // TODO
+        exception.expect(IllegalArgumentException.class);
+        Set<Contact> empty = new HashSet<>();
+        test.addNewPastMeeting(empty, getPastDate(), "Notes");
     }
 
     @Test
     public void addNewPastMeetingWithNonExistentContactsShouldThrowIllegalArgumentException() {
-        // TODO
+        exception.expect(IllegalArgumentException.class);
+        Set<Contact> unknown = createUnknownSetOfContacts(10);
+        test.addNewPastMeeting(unknown, getPastDate(), "Notes");
     }
 
     @Test
-    public void addNewPastMeetingWithASetOfSomeExistentSomeNonExistentContactsShouldThrowIllegalArgumentException() {
-        // TODO
+    public void addNewPastMeetingWithSomeExistentSomeNonExistentContactsShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        Contact unknown = new ContactImpl("Unknown", 10, "Notes");
+        Contact known = addContactgetContact();
+        Set<Contact> set = new HashSet<>();
+        set.add(known);
+        set.add(unknown);
+        test.addNewPastMeeting(set, getPastDate(), "Notes");
+    }
+
+    @Test
+    public void addNewPastMeetingWithFutureDateShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        addContacts(3);
+        test.addNewPastMeeting(test.getContacts("C"), getFutureDate(), "Notes");
     }
 
     @Test
