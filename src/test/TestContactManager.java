@@ -30,8 +30,6 @@ public class TestContactManager {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    // testing addNewContact() and getContacts()   -----------------------------------------------------
-
     /**
      * This method is used in following tests to create n valid contacts and add them to
      * the ContactManager list
@@ -55,6 +53,58 @@ public class TestContactManager {
             test.addNewContact("Smith", "Notes about Smith" + "(" + i + ")");
         }
     }
+
+    /**
+     * This method is used in various following tests to avoid code repetition.
+     * It adds a new contact with name "Valid" to the test ContactManager list of contacts,
+     * and returns it via the Set<Contacts> of method getContacts().
+     *
+     * @return the contact added to the ContactManger.
+     */
+    public Contact addContactgetContact() {
+        test.addNewContact("Valid", "Notes");
+        Set<Contact> validSet = test.getContacts("Valid");
+        return validSet.toArray(new Contact[validSet.size()])[0];
+    }
+
+    /**
+     * This method is used in some following tests to create a Set of n contacts none of which
+     * is added to the ContactManager list.
+     *
+     * @param n number of contacts to add to the Set.
+     * @return the Set of invalid (unknown) contacts.
+     */
+    public Set<Contact> createUnknownSetOfContacts(int n) {
+        Set<Contact> contacts = new HashSet<Contact>();
+        while(n>0) {
+            Contact contact = new ContactImpl("Contact" + n, n);
+            contacts.add(contact);
+            n--;
+        }
+        return contacts;
+    }
+
+    /**
+     * This method is used in following tests to quickly get a Calendar instance of a future date
+     *
+     * @return a future date.
+     */
+    public Calendar getFutureDate() {
+        Calendar date = new GregorianCalendar(3015, 12, 12, 12, 12);
+        return date;
+    }
+
+    /**
+     * This method is used in following tests to quickly get a Calendar instance of a past date
+     *
+     * @return a past date.
+     */
+    public Calendar getPastDate() {
+        Calendar date = new GregorianCalendar(2001, 12, 12, 12, 12);
+        return date;
+    }
+
+    // testing addNewContact() and getContacts()   -----------------------------------------------------
 
     @Test
     public void testAddNewContactWithNullNameShouldThrowNullPointerException() {
@@ -222,43 +272,6 @@ public class TestContactManager {
 
     // testing addFutureMeeting(), getFutureMeeting(), getMeeting() ------------------------------------
 
-    /**
-     * This method is used in some following tests to create a Set of n contacts none of which
-     * is added to the ContactManager list.
-     *
-     * @param n number of contacts to add to the Set.
-     * @return the Set of invalid (unknown) contacts.
-     */
-    public Set<Contact> createUnknownSetOfContacts(int n) {
-        Set<Contact> contacts = new HashSet<Contact>();
-        while(n>0) {
-            Contact contact = new ContactImpl("Contact" + n, n);
-            contacts.add(contact);
-            n--;
-        }
-        return contacts;
-    }
-
-    /**
-     * This method is used in following tests to quickly get a Calendar instance of a future date
-     *
-     * @return a future date.
-     */
-    public Calendar getFutureDate() {
-        Calendar date = new GregorianCalendar(3015, 12, 12, 12, 12);
-        return date;
-    }
-
-    /**
-     * This method is used in following tests to quickly get a Calendar instance of a past date
-     *
-     * @return a past date.
-     */
-    public Calendar getPastDate() {
-        Calendar date = new GregorianCalendar(2001, 12, 12, 12, 12);
-        return date;
-    }
-
     @Test
     public void addFutureMeetingWithNullContactsShouldThrowNullPointerException() {
         exception.expect(NullPointerException.class);
@@ -363,20 +376,17 @@ public class TestContactManager {
         test.addFutureMeeting(invalidSet, getFutureDate());
     }
 
-    // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
-
-    /**
-     * This method is used in various following tests to avoid code repetition.
-     * It adds a new contact with name "Valid" to the test ContactManager list of contacts,
-     * and returns it via the Set<Contacts> of method getContacts().
-     *
-     * @return the contact added to the ContactManger.
-     */
-    public Contact addContactgetContact() {
-        test.addNewContact("Valid", "Notes");
-        Set<Contact> validSet = test.getContacts("Valid");
-        return validSet.toArray(new Contact[validSet.size()])[0];
+    @Test
+    public void getFutureMeetingWithPastMeetingIdShouldThrowIllegalArgumentException() {
+        // TODO (need addNewPastMeeting to be tested)
     }
+
+    @Test
+    public void convertFutureMeetingToPastMeetingCompareWithMeeting() {
+        // TODO (need addNewPastMeeting to be tested)
+    }
+
+    // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
 
     @Test
     public void getFutureMeetingListWithNullContactsShouldThrowNullPointerException() {
@@ -465,6 +475,7 @@ public class TestContactManager {
         Calendar date1 = new GregorianCalendar(2018, 10, 10, 10, 10);
         Calendar date2 = new GregorianCalendar(2018, 10, 10, 10, 30);
         Calendar date3 = new GregorianCalendar(2018, 10, 10, 20, 20);
+        Calendar shouldBeIgnored = new GregorianCalendar(2018, 10, 9, 20, 20);
         // the date to use as parameter of getting the list of future meetings
         Calendar param = Calendar.getInstance();
         param.set(2018, 10, 10);
@@ -473,6 +484,7 @@ public class TestContactManager {
         int validID = valid.getId();
         addContactsSmith(10);
         addContacts(3);
+        int ignored = test.addFutureMeeting(test.getContacts("Smith"), shouldBeIgnored);
         int second = test.addFutureMeeting(test.getContacts("Valid"), date2);
         int third = test.addFutureMeeting(test.getContacts("Cont"), date3);
         int first = test.addFutureMeeting(test.getContacts(validID), date1);
@@ -523,52 +535,46 @@ public class TestContactManager {
     // TODO testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
 
     @Test
-    public void getFutureMeetingWithPastMeetingIdShouldThrowIllegalArgumentException() {
-    }
-
-    @Test
-    public void convertFutureMeetingToPastMeetingCompareWithMeeting() {
-    }
-
-    @Test
     public void addNewPastMeetingWithNullContactsShouldThrowNullPointerException() {
-
+        // TODO
     }
 
     @Test
     public void addNewPastMeetingWithNullDateShouldThrowNullPointerException() {
-
+        // TODO
     }
 
     @Test
     public void addNewPastMeetingWithNullTextShouldThrowNullPointerException() {
-
+        // TODO
     }
 
     @Test
     public void addNewPastMeetingWithEmptyContactSetShouldThrowIllegalArgumentException() {
-
+        // TODO
     }
 
     @Test
     public void addNewPastMeetingWithNonExistentContactsShouldThrowIllegalArgumentException() {
-
+        // TODO
     }
 
     @Test
     public void addNewPastMeetingWithASetOfSomeExistentSomeNonExistentContactsShouldThrowIllegalArgumentException() {
-
+        // TODO
     }
 
     @Test
     public void getPastMeetingWithIdOfAFutureMeetingShouldThrowIllegalArgumentException() {
-
+        // TODO
     }
 
     @Test
     public void getPastMeetingWithNonExistentIdShouldReturnNull() {
-
+        // TODO
     }
+
+
 
 
 }
