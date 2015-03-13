@@ -22,6 +22,53 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
+     * Check whether all the contacts of a given set are valid.
+     * To be considered valid, a contact has to be contained in the list contactSet.
+     * That is, a copy of the contact with existent name, id and notes would still
+     * not considered valid if that is not the object which is pointed by contactSet.
+     *
+     * @param toCheck the set which will be checked for valid contacts.
+     * @return true if all the contacts are valid (i.e. are contained in contactSet), false otherwise.
+     */
+    private boolean checkContacts(Set<Contact> toCheck) {
+        for(Contact c : toCheck) {
+            if(!contactSet.contains(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Sort a list of Meetings by date and time
+     *
+     * @param list the list to be sorted.
+     */
+    private void sortMeetingsDate(List<Meeting> list) {
+        list.sort((date1, date2) -> date1.getDate().compareTo(date2.getDate()));
+    }
+
+    /**
+     * Compare the date (year, month, day) of two Calendar instances,
+     * without checking the time, and return whether the three fields are equals
+     * (i.e. if the two dates are the same, regardless of the time)
+     *
+     * @param date1 a Calendar date.
+     * @param date2 a Calendar date.
+     * @return true if the two dates are equals (in terms of year, month and day), false otherwise.
+     */
+    private boolean sameDate(Calendar date1, Calendar date2) {
+        if (date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)) {
+            if (date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)) {
+                if (date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * This implementation considers a contact unknown if it doesn't belong to the set contactSet.
@@ -41,7 +88,7 @@ public class ContactManagerImpl implements ContactManager {
         if(contacts == null || date == null) {
             throw new NullPointerException("Argument cannot be null");
         } else if(!checkContacts(contacts)) {
-            throw new IllegalArgumentException("All the contacts for the meeting need to be valid");
+            throw new IllegalArgumentException("All the contacts of the meeting need to be valid");
         } else if(date.before(Calendar.getInstance())) {
             throw new IllegalArgumentException("Cannot create a FutureMeeting with a past date");
         } else {
@@ -114,7 +161,7 @@ public class ContactManagerImpl implements ContactManager {
         if(contact == null) {
             throw new NullPointerException("Cannot have a null contact");
         } else if(!contactSet.contains(contact)) {
-            throw new IllegalArgumentException("The contact doesn't belong to contactSet");
+            throw new IllegalArgumentException(contact.getName() + " has not been added to the list of contacts");
         } else {
             List<Meeting> list = new LinkedList<>();
             for (FutureMeeting f : futureMeetings) {
@@ -163,35 +210,6 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     * Sort a list of Meetings by date and time
-     *
-     * @param list the list to be sorted.
-     */
-    private void sortMeetingsDate(List<Meeting> list) {
-        list.sort((date1, date2) -> date1.getDate().compareTo(date2.getDate()));
-    }
-
-    /**
-     * Compare the date (year, month, day) of two Calendar instances,
-     * without checking the time, and return whether the three fields are equals
-     * (i.e. if the two dates are the same, regardless of the time)
-     *
-     * @param date1 a Calendar date.
-     * @param date2 a Calendar date.
-     * @return true if the two dates are equals (in terms of year, month and day), false otherwise.
-     */
-    private boolean sameDate(Calendar date1, Calendar date2) {
-        if (date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)) {
-            if (date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)) {
-                if (date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      *
      *
      * @param contact one of the user’s contacts
@@ -203,15 +221,32 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
+     * {@inheritDoc}
      *
+     * This implementation throws an IllegalArgumentException also if the date
+     * as parameter is set for a future date.
      *
      * @param contacts a list of participants
      * @param date the date on which the meeting took place
      * @param text messages to be added about the meeting.
+     * @throws IllegalArgumentException if the list of contacts is
+     *      empty, or any of the contacts does not exist,
+     *      or if the meeting is set for a time in the future
+     * @throws NullPointerException if any of the arguments is null
      */
     @Override
     public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text) {
-        // TODO
+        if (contacts == null || date == null || text == null) {
+            throw new NullPointerException("Cannot have a null argument");
+        } else if (contacts.isEmpty()) {
+            throw new IllegalArgumentException("The set of contacts is empty");
+        } else if (Calendar.getInstance().before(date)) {
+            throw new IllegalArgumentException("Cannot create a past meeting with a future date");
+        } else if (!checkContacts(contacts)) {
+            throw new IllegalArgumentException("All the contacts of the meeting need to be valid");
+        } else {
+            // TODO
+        }
     }
 
     /**
@@ -297,15 +332,6 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public void flush() {
         // TODO
-    }
-
-    public boolean checkContacts(Set<Contact> toCheck) {
-        for(Contact c : toCheck) {
-            if(!contactSet.contains(c)) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }
