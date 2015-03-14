@@ -10,15 +10,17 @@ public class ContactManagerImpl implements ContactManager {
     private Set<Contact> contactSet;
     private List<Meeting> meetings;
     private List<FutureMeeting> futureMeetings;
+    private List<PastMeeting> pastMeetings;
 
     /**
      *
      */
     public ContactManagerImpl() {
         IdCreator = new IdCreatorImpl();
-        contactSet = new LinkedHashSet<Contact>();
-        meetings = new ArrayList<Meeting>();
-        futureMeetings = new ArrayList<FutureMeeting>();
+        contactSet = new LinkedHashSet<>();
+        meetings = new LinkedList<>();
+        futureMeetings = new LinkedList<>();
+        pastMeetings = new LinkedList<>();
     }
 
     /**
@@ -195,14 +197,10 @@ public class ContactManagerImpl implements ContactManager {
             throw new NullPointerException("Cannot have a null date");
         } else {
             List<Meeting> list = new LinkedList<>();
-            if (date.after(Calendar.getInstance())) {
-                for (FutureMeeting f : futureMeetings) {
-                    if (sameDate(f.getDate(), date)) {
-                        list.add(f);
-                    }
+            for (Meeting m : meetings) {
+                if (sameDate(m.getDate(), date)) {
+                    list.add(m);
                 }
-            } else {
-                // TODO deal with pastMeetings
             }
             sortMeetingsDate(list);
             return list;
@@ -245,7 +243,10 @@ public class ContactManagerImpl implements ContactManager {
         } else if (!checkContacts(contacts)) {
             throw new IllegalArgumentException("All the contacts of the meeting need to be valid");
         } else {
-            // TODO
+            int id = IdCreator.createMeetingId();
+            PastMeeting pastMeeting = new PastMeetingImpl(date, contacts, id, text);
+            pastMeetings.add(pastMeeting);
+            meetings.add(pastMeeting);
         }
     }
 
