@@ -453,12 +453,36 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingListWithPastDateOneMeetingMatchingShouldReturnIt() {
-       // TODO (need addNewPastMeeting to be tested)
+        addContactsSmith(3);
+        int id = test.addFutureMeeting(test.getContacts("Smith"), getPastDate());
+        List<Meeting> list = test.getFutureMeetingList(getPastDate());
+        assertEquals(test.getMeeting(id), list.get(0));
     }
 
     @Test
-    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldReturnThemSorted() {
-        // TODO (need addNewPastMeeting to be tested)
+    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldReturnThemSortedByTime() {
+        // three same dates, different times to be added to three meetings
+        Calendar date1 = new GregorianCalendar(2010, 10, 10, 10, 10);
+        Calendar date2 = new GregorianCalendar(2010, 10, 10, 10, 30);
+        Calendar date3 = new GregorianCalendar(2010, 10, 10, 20, 20);
+        Calendar shouldBeIgnored = new GregorianCalendar(2009, 10, 10, 10, 20);
+        // the date to use as parameter of getting the list of future meetings
+        Calendar param = Calendar.getInstance();
+        param.set(2010, 10, 10);
+        // add new three meetings via different ways (one through id, few with same name, few with different names)
+        Contact valid = addContactgetContact();
+        int validID = valid.getId();
+        addContactsSmith(10);
+        addContacts(3);
+        int ignored = test.addFutureMeeting(test.getContacts("Smith"), shouldBeIgnored);
+        int second = test.addFutureMeeting(test.getContacts("Valid"), date2);
+        int third = test.addFutureMeeting(test.getContacts("Cont"), date3);
+        int first = test.addFutureMeeting(test.getContacts(validID), date1);
+        List<Meeting> meetings = test.getFutureMeetingList(param);
+        assertEquals(meetings.size(), 3);
+        assertEquals(meetings.get(0).getId(), first);
+        assertEquals(meetings.get(1).getId(), second);
+        assertEquals(meetings.get(2).getId(), third);
     }
 
     @Test
@@ -530,9 +554,7 @@ public class TestContactManager {
         // TODO
     }
 
-
-
-    // TODO testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
+    // testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
 
     @Test
     public void addNewPastMeetingWithNullContactsShouldThrowNullPointerException() {
@@ -587,6 +609,23 @@ public class TestContactManager {
     }
 
     @Test
+    public void addNewPastMeetingGetFutureMeetingListCompareNotes() {
+        addContacts(1);
+        test.addNewPastMeeting(test.getContacts("Contact"), getPastDate(), "Notes should match");
+        List<Meeting> list = test.getFutureMeetingList(getPastDate());
+        assertEquals(list.size(), 1);
+        Set<Contact> set = list.get(0).getContacts();
+        Contact c = set.toArray(new Contact[set.size()])[0];
+        assertEquals(c.getNotes(), "Notes should match");
+
+    }
+
+    @Test
+    public void addNewPastMeetingGetFutureMeetingListCompareGetMeetingWithGetPastMeetingIds() {
+        // TODO
+    }
+
+    @Test
     public void getPastMeetingWithIdOfAFutureMeetingShouldThrowIllegalArgumentException() {
         // TODO
     }
@@ -595,6 +634,11 @@ public class TestContactManager {
     public void getPastMeetingWithNonExistentIdShouldReturnNull() {
         // TODO
     }
+
+
+
+
+
 
 
 
