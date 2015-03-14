@@ -453,19 +453,22 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingListWithPastDateOneMeetingMatchingShouldReturnIt() {
+        Calendar changingDate = Calendar.getInstance();
+        changingDate.set(2020, Calendar.OCTOBER, 10);
         addContactsSmith(3);
-        int id = test.addFutureMeeting(test.getContacts("Smith"), getPastDate());
-        List<Meeting> list = test.getFutureMeetingList(getPastDate());
+        int id = test.addFutureMeeting(test.getContacts("Smith"),changingDate);
+        changingDate.set(2001, Calendar.OCTOBER, 10);
+        List<Meeting> list = test.getFutureMeetingList(changingDate);
         assertEquals(test.getMeeting(id), list.get(0));
     }
 
     @Test
     public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldReturnThemSortedByTime() {
-        // three same dates, different times to be added to three meetings
-        Calendar date1 = new GregorianCalendar(2010, 10, 10, 10, 10);
-        Calendar date2 = new GregorianCalendar(2010, 10, 10, 10, 30);
-        Calendar date3 = new GregorianCalendar(2010, 10, 10, 20, 20);
-        Calendar shouldBeIgnored = new GregorianCalendar(2009, 10, 10, 10, 20);
+        // three same dates, different times to be added to three meetings (future date to avoid exception)
+        Calendar date1 = new GregorianCalendar(2020, 10, 10, 10, 10);
+        Calendar date2 = new GregorianCalendar(2020, 10, 10, 10, 30);
+        Calendar date3 = new GregorianCalendar(2020, 10, 10, 20, 20);
+        Calendar shouldBeIgnored = new GregorianCalendar(2019, 10, 10, 10, 20);
         // the date to use as parameter of getting the list of future meetings
         Calendar param = Calendar.getInstance();
         param.set(2010, 10, 10);
@@ -478,6 +481,10 @@ public class TestContactManager {
         int second = test.addFutureMeeting(test.getContacts("Valid"), date2);
         int third = test.addFutureMeeting(test.getContacts("Cont"), date3);
         int first = test.addFutureMeeting(test.getContacts(validID), date1);
+        // set the dates of the meetings to the past
+        date1.set(2010, 10, 10, 10, 10);
+        date2.set(2010, 10, 10, 10, 30);
+        date3.set(2010, 10, 10, 20, 20);
         List<Meeting> meetings = test.getFutureMeetingList(param);
         assertEquals(meetings.size(), 3);
         assertEquals(meetings.get(0).getId(), first);
@@ -609,15 +616,13 @@ public class TestContactManager {
     }
 
     @Test
-    public void addNewPastMeetingGetFutureMeetingListCompareNotes() {
+    public void addNewPastMeetingGetFutureMeetingListCompareWithMeetingDowncasted() {
         addContacts(1);
         test.addNewPastMeeting(test.getContacts("Contact"), getPastDate(), "Notes should match");
         List<Meeting> list = test.getFutureMeetingList(getPastDate());
         assertEquals(list.size(), 1);
-        Set<Contact> set = list.get(0).getContacts();
-        Contact c = set.toArray(new Contact[set.size()])[0];
-        assertEquals(c.getNotes(), "Notes should match");
-
+        PastMeeting m = (PastMeeting)list.get(0);
+        assertEquals("Notes should match", m.getNotes());
     }
 
     @Test
