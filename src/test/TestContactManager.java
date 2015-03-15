@@ -378,7 +378,11 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingWithPastMeetingIdShouldThrowIllegalArgumentException() {
-        // TODO (need addNewPastMeeting to be tested)
+        exception.expect(IllegalArgumentException.class);
+        addContacts(3);
+        test.addNewPastMeeting(test.getContacts("C"), getPastDate(), "Notes");
+        int pastId = test.getFutureMeetingList(getPastDate()).get(0).getId();
+        test.getFutureMeeting(pastId);
     }
 
     @Test
