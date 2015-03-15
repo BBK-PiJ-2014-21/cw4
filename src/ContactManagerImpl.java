@@ -133,10 +133,14 @@ public class ContactManagerImpl implements ContactManager {
      */
     @Override
     public FutureMeeting getFutureMeeting(int id) {
-        // TODO if(id is in PastMeetingList throw exception)
-        for(FutureMeeting m : futureMeetings) {
-            if(m.getId()==id) {
-                return m;
+        for(PastMeeting p : pastMeetings) {
+            if(p.getId()==id) {
+                throw new IllegalArgumentException("Meeting " + id + " is already listed as Past Meeting");
+            }
+        }
+        for(FutureMeeting f : futureMeetings) {
+            if(f.getId()==id) {
+                return f;
             }
         }
         return null;
