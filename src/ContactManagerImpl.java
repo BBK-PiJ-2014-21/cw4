@@ -46,7 +46,7 @@ public class ContactManagerImpl implements ContactManager {
      *
      * @param list the list to be sorted.
      */
-    private void sortMeetingsDate(List<Meeting> list) {
+    private void sortMeetingsDate(List<? extends Meeting> list) {
         list.sort((date1, date2) -> date1.getDate().compareTo(date2.getDate()));
     }
 
@@ -223,14 +223,28 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     *
+     * {@inheritDoc}
      *
      * @param contact one of the user’s contacts
-     * @return
+     * @return the list of past meeting(s) scheduled with this contact (maybe empty).
+     * @throws IllegalArgumentException if the contact does not exist
      */
     @Override
     public List<PastMeeting> getPastMeetingList(Contact contact) {
-        return null; // TODO
+        if(contact == null) {
+            throw new NullPointerException("Cannot have null argument");
+        } else if(!contactSet.contains(contact)) {
+            throw new IllegalArgumentException(contact.getName() + " has not been added to the Contacts list");
+        } else {
+            List<PastMeeting> list = new LinkedList<>();
+            for(PastMeeting p : pastMeetings) {
+                if(p.getContacts().contains(contact)) {
+                    list.add(p);
+                }
+            }
+            sortMeetingsDate(list);
+            return list;
+        }
     }
 
     /**
