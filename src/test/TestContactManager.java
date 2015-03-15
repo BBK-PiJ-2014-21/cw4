@@ -435,7 +435,42 @@ public class TestContactManager {
 
     @Test
     public void getFutureMeetingListWithValidContactFewMeetingsShouldReturnAListWithNoDuplicates() {
-     // TODO (should implement control over same contacts and date meetings? Probably not.)
+        Contact valid = addContactgetContact();
+        test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2018, 6, 4, 16, 30));
+        test.addFutureMeeting(test.getContacts("Valid"), new GregorianCalendar(2020, 12, 12, 13, 13));
+        List<Meeting> list = test.getFutureMeetingList(valid);
+        Meeting[] array = list.toArray(new Meeting[list.size()]);
+        for(int i = 0; i < array.length; i++) {
+            for(int j = 0; j < array.length; j++) {
+                if(i!=j) {
+                    assertNotEquals(array[i], array[j]);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldHaveNoDuplicates() {
+        Contact valid = addContactgetContact();
+        Calendar date1 = getFutureDate();
+        Calendar date2 = getFutureDate();
+        Calendar date3 = getFutureDate();
+        test.addFutureMeeting(test.getContacts("Valid"), date1);
+        test.addFutureMeeting(test.getContacts("Valid"), date2);
+        test.addFutureMeeting(test.getContacts("Valid"), date3);
+        date1.set(1985, 21, 9);
+        date2.set(1983, 02, 10);
+        date3.set(1990, 10, 10);
+        List<Meeting> list = test.getFutureMeetingList(valid);
+        Meeting[] array = list.toArray(new Meeting[list.size()]);
+        for(int i = 0; i < array.length; i++) {
+            for(int j = 0; j < array.length; j++) {
+                if(i!=j) {
+                    assertNotEquals(array[i], array[j]);
+                }
+            }
+        }
     }
 
     @Test
@@ -531,38 +566,68 @@ public class TestContactManager {
     }
 
     @Test
-    public void getFutureMeetingListWithFutureDateFewMeetingsMatchingShouldHaveNoDuplicates() {
-        // TODO (should implement control over same contacts and date meetings? Probably not.)
-    }
-
-    @Test
-    public void getFutureMeetingListWithPastDateFewMeetingsMatchingShouldHaveNoDuplicates() {
-        // TODO (should implement control over same contacts and date meetings? Probably not.)
-    }
-
-    @Test
     public void getPastMeetingListWithNullContactShouldThrowNullPointerException() {
-        // TODO
+        exception.expect(NullPointerException.class);
+        test.getPastMeetingList(null);
     }
 
     @Test
     public void getPastMeetingListWithNonExistentContactShouldThrowIllegalArgumentException() {
-        // TODO
+        exception.expect(IllegalArgumentException.class);
+        Set<Contact> unknownSet = createUnknownSetOfContacts(1);
+        Contact unknown = (Contact) unknownSet.toArray()[0];
+        test.getPastMeetingList(unknown);
     }
 
     @Test
     public void getPastMeetingListWithValidContactNoMeetingsShouldReturnAnEmptyList() {
-        // TODO
+        Contact valid = addContactgetContact();
+        assertTrue(test.getPastMeetingList(valid).isEmpty());
     }
 
     @Test
-    public void getPastMeetingListWithValidContactOneMeetingShouldReturnIt() {
-        // TODO
+    public void getPastMeetingListWithValidContactOnePastMeetingShouldReturnIt() {
+        Contact valid = addContactgetContact(); // add a contact with name "Valid"
+        Set<Contact> set = test.getContacts("V");
+        test.addNewPastMeeting(set, getPastDate(), "Notes");
+        List<PastMeeting> list = test.getPastMeetingList(valid);
+        assertEquals(list.size(), 1);
+        assertEquals(list.get(0).getContacts(), set);
     }
 
     @Test
-    public void getPastMeetingListWithValidContactFewMeetingsShouldReturnThemSorted() {
-        // TODO
+    public void getPastMeetingListWithValidContactFewPastMeetingsShouldReturnThemSorted() {
+        Contact valid = addContactgetContact(); // add a contact with name "Valid"
+        addContacts(10);    // add new contacts with name "Contact", should be ignored
+        test.addNewPastMeeting(test.getContacts("Contact"), getPastDate(), "Should be ignored");
+        Calendar date1 = Calendar.getInstance();
+        Calendar date2 = Calendar.getInstance();
+        Calendar date3 = Calendar.getInstance();
+        date1.set(1985, Calendar.OCTOBER, 10);
+        date2.set(1990, Calendar.JANUARY, 9);
+        date3.set(1990, Calendar.JANUARY, 10);
+        Set<Contact> set = test.getContacts("V");
+        test.addNewPastMeeting(set, getPastDate(), "Notes about the 2001 Meeting");
+        test.addNewPastMeeting(set, date3, "Notes about the 10/01/1990 Meeting");
+        test.addNewPastMeeting(set, date2, "Notes about the 09/01/1990 Meeting");
+        test.addNewPastMeeting(set, date1, "Notes about the 1985 Meeting");
+        List<PastMeeting> list = test.getPastMeetingList(valid);
+        PastMeeting[] array = list.toArray(new PastMeeting[list.size()]);
+        assertEquals(list.size(), 4);
+        assertEquals(array[0].getNotes(), "Notes about the 1985 Meeting");
+        assertEquals(array[1].getNotes(), "Notes about the 09/01/1990 Meeting");
+        assertEquals(array[2].getNotes(), "Notes about the 10/01/1990 Meeting");
+        assertEquals(array[3].getNotes(), "Notes about the 2001 Meeting");
+    }
+
+    @Test
+    public void getPastMeetingListWithValidContactOneFutureMeetingConvertedShouldReturnIt() {
+        // TODO need to test addMeetingNotes
+    }
+
+    @Test
+    public void getPastMeetingListWithValidContactFewFutureMeetingsConvertedFewPastMeetingsShouldReturnThemSorted() {
+        // TODO need to test addMeetingNotes
     }
 
     // testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
