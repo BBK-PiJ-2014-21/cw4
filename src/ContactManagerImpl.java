@@ -103,14 +103,25 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     *
+     * {@inheritDoc}
      *
      * @param id the ID for the meeting
-     * @return
+     * @return the meeting with the requested ID, or null if there is none.
+     * @throws IllegalArgumentException if there is a meeting with that ID happening in the future
      */
     @Override
     public PastMeeting getPastMeeting(int id) {
-        return null; // TODO
+        for(FutureMeeting f : futureMeetings) {
+            if(f.getId()==id) {
+                throw new IllegalArgumentException("Meeting " + id + " is in the Future Meetings List");
+            }
+        }
+        for(PastMeeting p : pastMeetings) {
+            if(p.getId()==id) {
+                return p;
+            }
+        }
+        return null;
     }
 
     /**
