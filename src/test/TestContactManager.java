@@ -246,6 +246,17 @@ public class TestContactManager {
     }
 
     @Test
+    public void testAddOneNewContactGetContactByIdOneNotCorrespondingOneValid() {
+        exception.expect(IllegalArgumentException.class);
+        addContacts(1);
+        Set<Contact> list = test.getContacts("Contact1");
+        assertEquals(list.size(), 1);
+        Contact first = (Contact)list.toArray()[0];
+        int validID = first.getId();
+        test.getContacts(1231, validID);
+    }
+
+    @Test
     public void testGetContactEmptyStringShouldThrowNullPointerException() {
         exception.expect(NullPointerException.class);
         test.getContacts("");
@@ -793,7 +804,7 @@ public class TestContactManager {
     }
 
     @Test
-    public void addMeetingNotesCheckGetMeetingBeforeAndAfterShouldReturnTheSameMeeting() {
+    public void addMeetingNotesCheckGetMeetingBeforeAndAfterShouldHaveTheSameContactsAndDate() {
         addContactgetContact();   // added contact named "Valid"
         Calendar date = Calendar.getInstance();
         date.set(2020, Calendar.OCTOBER, 10);
@@ -802,7 +813,8 @@ public class TestContactManager {
         date.set(2010, Calendar.OCTOBER, 10);
         test.addMeetingNotes(id, "Notes");
         Meeting past = test.getMeeting(id);
-        assertEquals(future, past);
+        assertEquals(future.getContacts(), past.getContacts());
+        assertEquals(future.getDate(), past.getDate());
     }
 
     @Test
