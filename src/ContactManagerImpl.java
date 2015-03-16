@@ -9,8 +9,6 @@ public class ContactManagerImpl implements ContactManager {
     private IdCreatorImpl IdCreator;
     private Set<Contact> contactSet;
     private List<Meeting> meetings;
-    private List<FutureMeeting> futureMeetings;
-    private List<PastMeeting> pastMeetings;
 
     /**
      *
@@ -19,8 +17,6 @@ public class ContactManagerImpl implements ContactManager {
         IdCreator = new IdCreatorImpl();
         contactSet = new LinkedHashSet<>();
         meetings = new LinkedList<>();
-        futureMeetings = new LinkedList<>();
-        pastMeetings = new LinkedList<>();
     }
 
     /**
@@ -71,6 +67,35 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
+     * Convert a FutureMeeting to PastMeeting, without adding notes.
+     * This method is called from getPastMeeting(id) and getPastMeetingList(Set<Contact>)
+     * when a matching FutureMeeting with a past date is found.
+     *
+     * @param f the FutureMeeting to be converted to PastMeeting.
+     */
+    private PastMeeting convertToPastMeeting(FutureMeeting f) {
+        PastMeeting p = new PastMeetingImpl(f.getDate(), f.getContacts(), f.getId());
+        meetings.remove(f);
+        meetings.add(p);
+        return p;
+    }
+
+    /**
+     * Convert a FutureMeeting to PastMeeting, with notes.
+     * This method is called from addMeetingNotes()
+     *
+     * @param f the FutureMeeting to be converted to PastMeeting.
+     * @param notes the notes to be added to the PastMeeting.
+     * @return the converted PastMeeting.
+     */
+    private PastMeeting convertToPastMeeting(FutureMeeting f, String notes) {
+        PastMeeting p = new PastMeetingImpl(f.getDate(), f.getContacts(), f.getId(), notes);
+        meetings.remove(f);
+        meetings.add(p);
+        return p;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * This implementation considers a contact unknown if it doesn't belong to the set contactSet.
@@ -95,8 +120,7 @@ public class ContactManagerImpl implements ContactManager {
             throw new IllegalArgumentException("Cannot create a FutureMeeting with a past date");
         } else {
             int id = IdCreator.createMeetingId();
-            Meeting meeting = new FutureMeetingImpl(date, contacts, id);
-            futureMeetings.add((FutureMeeting)meeting);
+            FutureMeeting meeting = new FutureMeetingImpl(date, contacts, id);
             meetings.add(meeting);
             return id;
         }
@@ -105,20 +129,26 @@ public class ContactManagerImpl implements ContactManager {
     /**
      * {@inheritDoc}
      *
+     * If the meeting with the requested ID has a past date but has not been converted to PastMeeting yet,
+     * it will be converted without notes.
+     *
      * @param id the ID for the meeting
      * @return the meeting with the requested ID, or null if there is none.
      * @throws IllegalArgumentException if there is a meeting with that ID happening in the future
      */
     @Override
     public PastMeeting getPastMeeting(int id) {
-        for(FutureMeeting f : futureMeetings) {
-            if(f.getId()==id) {
-                throw new IllegalArgumentException("Meeting " + id + " is in the Future Meetings List");
-            }
-        }
-        for(PastMeeting p : pastMeetings) {
-            if(p.getId()==id) {
-                return p;
+        for(Meeting m : meetings) {
+            if(m.getId()==id) {
+                if (m.getDate().after(Calendar.getInstance())) {
+                    throw new IllegalArgumentException("Meeting " + id + " is happening in the future");
+                } else {
+                    if (m instanceof FutureMeeting) {
+                        return convertToPastMeeting((FutureMeeting) m);
+                    } else {
+                        return (PastMeeting) m;
+                    }
+                }
             }
         }
         return null;
@@ -133,14 +163,13 @@ public class ContactManagerImpl implements ContactManager {
      */
     @Override
     public FutureMeeting getFutureMeeting(int id) {
-        for(PastMeeting p : pastMeetings) {
-            if(p.getId()==id) {
-                throw new IllegalArgumentException("Meeting " + id + " is already listed as Past Meeting");
-            }
-        }
-        for(FutureMeeting f : futureMeetings) {
-            if(f.getId()==id) {
-                return f;
+        for(Meeting m : meetings) {
+            if(m.getId()==id) {
+                if(m.getDate().before(Calendar.getInstance())) {
+                    throw new IllegalArgumentException("Meeting " + id + " is happening in the past");
+                } else {
+                    return (FutureMeeting)m;
+                }
             }
         }
         return null;
@@ -181,9 +210,9 @@ public class ContactManagerImpl implements ContactManager {
             throw new IllegalArgumentException(contact.getName() + " has not been added to the list of contacts");
         } else {
             List<Meeting> list = new LinkedList<>();
-            for (FutureMeeting f : futureMeetings) {
-                if(f.getContacts().contains(contact)) {
-                    list.add(f);
+            for (Meeting m : meetings) {
+                if(m.getDate().after(Calendar.getInstance()) && (m.getContacts().contains(contact))) {
+                    list.add(m);
                 }
             }
             sortMeetingsDate(list);
@@ -225,6 +254,9 @@ public class ContactManagerImpl implements ContactManager {
     /**
      * {@inheritDoc}
      *
+     * If a meeting with matching contacts is a FutureMeeting with a past date,
+     * it will be converted to a PastMeeting without notes.
+     *
      * @param contact one of the user’s contacts
      * @return the list of past meeting(s) scheduled with this contact (maybe empty).
      * @throws IllegalArgumentException if the contact does not exist
@@ -237,9 +269,14 @@ public class ContactManagerImpl implements ContactManager {
             throw new IllegalArgumentException(contact.getName() + " has not been added to the Contacts list");
         } else {
             List<PastMeeting> list = new LinkedList<>();
-            for(PastMeeting p : pastMeetings) {
-                if(p.getContacts().contains(contact)) {
-                    list.add(p);
+            for(Meeting m : meetings) {
+                if(m.getDate().before(Calendar.getInstance()) && m.getContacts().contains(contact)) {
+                    if (m instanceof FutureMeeting) {
+                        PastMeeting converted = convertToPastMeeting((FutureMeeting) m);
+                        list.add(converted);
+                    } else {
+                        list.add((PastMeeting) m);
+                    }
                 }
             }
             sortMeetingsDate(list);
@@ -274,7 +311,6 @@ public class ContactManagerImpl implements ContactManager {
         } else {
             int id = IdCreator.createMeetingId();
             PastMeeting pastMeeting = new PastMeetingImpl(date, contacts, id, text);
-            pastMeetings.add(pastMeeting);
             meetings.add(pastMeeting);
         }
     }
@@ -290,26 +326,27 @@ public class ContactManagerImpl implements ContactManager {
      */
     @Override
     public void addMeetingNotes(int id, String text) {
-        if(text == null) {
+        if (text == null) {
             throw new NullPointerException("Cannot have null notes");
         }
-        for(PastMeeting p : pastMeetings) {
-            if(p.getId()==id) {
-                String notes = p.getNotes() + " " + text;
-                PastMeeting updated = new PastMeetingImpl(p.getDate(), p.getContacts(), p.getId(), notes);
-                pastMeetings.remove(p);
-                pastMeetings.add(updated);
-                return;
-            }
-        }
-        for(FutureMeeting f : futureMeetings) {
-            if(f.getId()==id) {
-                if(f.getDate().after(Calendar.getInstance())) {
-                    throw new IllegalStateException("The meeting is set for a date in the future");
+        for (Meeting m : meetings) {
+            if (m.getId() == id) {
+                if (m.getDate().after(Calendar.getInstance())) {
+                    throw new IllegalStateException("Meeting " + id + " is set for a date in the future.");
                 } else {
-                    PastMeeting updated = new PastMeetingImpl(f.getDate(), f.getContacts(), f.getId(), text);
-                    futureMeetings.remove(f);
-                    pastMeetings.add(updated);
+                    PastMeeting updated;
+                    if (m instanceof PastMeeting) {
+                        if (((PastMeeting) m).getNotes().equals("")) {
+                            updated = new PastMeetingImpl(m.getDate(), m.getContacts(), m.getId(), text);
+                        } else {    // append new Notes after the old ones
+                            String notes = ((PastMeeting) m).getNotes() + " " + text;
+                            updated = new PastMeetingImpl(m.getDate(), m.getContacts(), m.getId(), notes);
+                        }
+                        meetings.remove(m);
+                        meetings.add(updated);
+                    } else {    // the Meeting is a FutureMeeting to be converted
+                        convertToPastMeeting((FutureMeeting) m, text);
+                    }
                     return;
                 }
             }
