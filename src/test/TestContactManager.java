@@ -385,11 +385,6 @@ public class TestContactManager {
         test.getFutureMeeting(pastId);
     }
 
-    @Test
-    public void convertFutureMeetingToPastMeetingCompareWithMeeting() {
-        // TODO (need addMeetingNotes to be tested)
-    }
-
     // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
 
     @Test
@@ -620,16 +615,6 @@ public class TestContactManager {
         assertEquals(array[3].getNotes(), "Notes about the 2001 Meeting");
     }
 
-    @Test
-    public void getPastMeetingListWithValidContactOneFutureMeetingConvertedShouldReturnIt() {
-        // TODO need to test addMeetingNotes
-    }
-
-    @Test
-    public void getPastMeetingListWithValidContactFewFutureMeetingsConvertedFewPastMeetingsShouldReturnThemSorted() {
-        // TODO need to test addMeetingNotes
-    }
-
     // testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
 
     @Test
@@ -756,18 +741,156 @@ public class TestContactManager {
         assertEquals(p2.getContacts(), set2);
     }
 
+    // testing addMeetingNotes() -----------------------------------------------------------------------
+
     @Test
-    public void getPastMeetingFromConvertedFutureMeetingShouldReturnIt() {
-        // TODO need to test addMeetingNotes()
+    public void addMeetingNotesWithValidIdNullNotesShouldThrowNullPointerException() {
+        exception.expect(NullPointerException.class);
+        addContacts(1);
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("C"),date);
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, null);
     }
 
-    //    -------------------------------------------------
+    @Test
+    public void addMeetingNotesWithNonExistentIdShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        test.addMeetingNotes(1010, "Notes");
+    }
 
+    @Test
+    public void addMeetingNotesOnAMeetingSetUpInTheFutureShouldThrowIllegalStateException() {
+        exception.expect(IllegalStateException.class);
+        addContacts(1);
+        int futureID = test.addFutureMeeting(test.getContacts("C"), getFutureDate());
+        test.addMeetingNotes(futureID, "Notes");
+    }
 
+    @Test
+    public void addMeetingNotesCheckMeetingIsRemovedFromFutureMeetingList() {
+        Contact contact = addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        assertFalse(test.getFutureMeetingList(contact).isEmpty());
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes");
+        assertTrue(test.getFutureMeetingList(contact).isEmpty());
+    }
 
+    @Test
+    public void addMeetingNotesCheckMeetingIsAddedToPastMeetingList() {
+        Contact contact = addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        assertTrue(test.getPastMeetingList(contact).isEmpty());
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes");
+        assertFalse(test.getPastMeetingList(contact).isEmpty());
+    }
 
+    @Test
+    public void addMeetingNotesCheckGetMeetingBeforeAndAfterShouldReturnTheSameMeeting() {
+        addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        Meeting future = test.getMeeting(id);
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes");
+        Meeting past = test.getMeeting(id);
+        assertEquals(future, past);
+    }
 
+    @Test
+    public void convertFutureMeetingToPastMeetingCompareFieldsWithMeeting() {
+        addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes");
+        Meeting meeting = test.getMeeting(id);
+        PastMeeting pastmeeting = test.getPastMeeting(id);
+        assertEquals(meeting.getContacts(), pastmeeting.getContacts());
+        assertEquals(meeting.getId(), pastmeeting.getId());
+        assertEquals(meeting.getDate(), pastmeeting.getDate());
+    }
 
+    @Test
+    public void addMeetingNotesGetFutureMeetingShouldThrowIllegalArgumentException() {
+        exception.expect(IllegalArgumentException.class);
+        addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes");
+        test.getFutureMeeting(id);
+    }
 
+    @Test
+    public void addMeetingNotesGetPastMeetingShouldReturnItCheckNotes() {
+        addContactgetContact();   // added contact named "Valid"
+        Calendar date = Calendar.getInstance();
+        date.set(2020, Calendar.OCTOBER, 10);
+        int id = test.addFutureMeeting(test.getContacts("V"), date);
+        date.set(2010, Calendar.OCTOBER, 10);
+        test.addMeetingNotes(id, "Notes added to a Past Meeting");
+        assertEquals(test.getPastMeeting(id).getNotes(), "Notes added to a Past Meeting");
+    }
+
+    @Test
+    public void addMeetingNotesOnPastMeetingCheckNotesAreUpdated() {
+        Contact contact = addContactgetContact();
+        test.addNewPastMeeting(test.getContacts("V"), getPastDate(), "First set of notes.");
+        int id = test.getFutureMeetingList(getPastDate()).get(0).getId();
+        test.addMeetingNotes(id, "Some more notes.");
+        assertEquals(test.getPastMeeting(id).getNotes(), "First set of notes. Some more notes.");
+    }
+
+    @Test
+    public void getPastMeetingListWithValidContactFewFutureMeetingsConvertedFewPastMeetingsShouldReturnThemSorted() {
+        // add a contact named "Valid"
+        Contact contact = addContactgetContact();
+        // create five dates
+        Calendar date1 = Calendar.getInstance();
+        Calendar date2 = Calendar.getInstance();
+        Calendar date3 = Calendar.getInstance();
+        Calendar date4 = Calendar.getInstance();
+        Calendar date5 = Calendar.getInstance();
+        date1.set(2020, Calendar.OCTOBER, 10);
+        date2.set(2030, Calendar.OCTOBER, 10);
+        date3.set(2040, Calendar.OCTOBER, 10);
+        date4.set(1999, Calendar.OCTOBER, 9);
+        date5.set(2000, Calendar.OCTOBER, 19);
+        // set two PastMeetings
+        test.addNewPastMeeting(test.getContacts("Valid"), date4, "1999 Meeting");
+        int pastId1 = test.getFutureMeetingList(date4).get(0).getId();
+        test.addNewPastMeeting(test.getContacts("Valid"), date5, "2000 Meeting");
+        // set three FutureMeetings
+        int futureId1 = test.addFutureMeeting(test.getContacts("Valid"), date1);
+        int futureId2 = test.addFutureMeeting(test.getContacts("Valid"), date2);
+        int futureId3 = test.addFutureMeeting(test.getContacts(contact.getId()), date3);
+        // change the dates of the FutureMeetings to convert them to PastMeetings
+        date1.set(1985, Calendar.OCTOBER, 10);
+        date2.set(1985, Calendar.OCTOBER, 11);
+        date3.set(1991, Calendar.DECEMBER, 2);
+        // convert the three FutureMeetings to PastMeetings
+        test.addMeetingNotes(futureId2, "11/10/1985 Meeting");
+        test.addMeetingNotes(futureId3, "1991 Meeting");
+        test.addMeetingNotes(futureId1, "10/10/1985 Meeting");
+        // get the whole five PastMeetings and check the list is sorted by date
+        List<PastMeeting> list = test.getPastMeetingList(contact);
+        assertEquals(list.size(), 5);
+        assertEquals(list.get(0).getNotes(), "10/10/1985 Meeting");
+        assertEquals(list.get(1).getNotes(), "11/10/1985 Meeting");
+        assertEquals(list.get(2).getNotes(), "1991 Meeting");
+        assertEquals(list.get(3).getNotes(), "1999 Meeting");
+        assertEquals(list.get(4).getNotes(), "2000 Meeting");
+    }
 
 }
