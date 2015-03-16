@@ -280,14 +280,41 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     *
+     * {@inheritDoc}
      *
      * @param id the ID of the meeting
      * @param text messages to be added about the meeting.
+     * @throws IllegalArgumentException if the meeting does not exist
+     * @throws IllegalStateException if the meeting is set for a date in the future
+     * @throws NullPointerException if the notes are null
      */
     @Override
     public void addMeetingNotes(int id, String text) {
-        // TODO
+        if(text == null) {
+            throw new NullPointerException("Cannot have null notes");
+        }
+        for(PastMeeting p : pastMeetings) {
+            if(p.getId()==id) {
+                String notes = p.getNotes() + " " + text;
+                PastMeeting updated = new PastMeetingImpl(p.getDate(), p.getContacts(), p.getId(), notes);
+                pastMeetings.remove(p);
+                pastMeetings.add(updated);
+                return;
+            }
+        }
+        for(FutureMeeting f : futureMeetings) {
+            if(f.getId()==id) {
+                if(f.getDate().after(Calendar.getInstance())) {
+                    throw new IllegalStateException("The meeting is set for a date in the future");
+                } else {
+                    PastMeeting updated = new PastMeetingImpl(f.getDate(), f.getContacts(), f.getId(), text);
+                    futureMeetings.remove(f);
+                    pastMeetings.add(updated);
+                    return;
+                }
+            }
+        }
+        throw new IllegalArgumentException("The meeting does not exist");
     }
 
     /**
