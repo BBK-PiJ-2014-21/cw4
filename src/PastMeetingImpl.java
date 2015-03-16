@@ -62,7 +62,7 @@ public class PastMeetingImpl extends MeetingImpl implements PastMeeting {
      * Add some notes about the past meeting.
      *
      * @param newNotes the new notes to be added about the meeting
-     * @throws NullPointerException for an attempt
+     * @throws NullPointerException for an attempt to add null notes
      */
     public void addNotes(String newNotes) {
         if(newNotes==null) {
