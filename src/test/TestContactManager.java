@@ -1,10 +1,8 @@
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 
+import java.io.File;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -16,15 +14,18 @@ import static org.junit.Assert.*;
  */
 public class TestContactManager {
     private ContactManager test;
+    private File file;
 
     @Before
     public void setUp() {
         test = new ContactManagerImpl();
+        file = new File("Contact.txt");
     }
 
     @After
     public void tearDown() {
         test = null;
+        file.delete();
     }
 
     @Rule
@@ -104,7 +105,7 @@ public class TestContactManager {
         return date;
     }
 
-    // testing addNewContact() and getContacts()   -----------------------------------------------------
+    // testing addNewContact() and getContacts()   --------------------------------------------------------------------
 
     @Test
     public void testAddNewContactWithNullNameShouldThrowNullPointerException() {
@@ -281,7 +282,7 @@ public class TestContactManager {
         assertEquals(empty.size(), 0);
     }
 
-    // testing addFutureMeeting(), getFutureMeeting(), getMeeting() ------------------------------------
+    // testing addFutureMeeting(), getFutureMeeting(), getMeeting() ---------------------------------------------------
 
     @Test
     public void addFutureMeetingWithNullContactsShouldThrowNullPointerException() {
@@ -396,7 +397,7 @@ public class TestContactManager {
         test.getFutureMeeting(pastId);
     }
 
-    // testing getFutureMeetingList(), getPastMeetingList()   ------------------------------------------
+    // testing getFutureMeetingList(), getPastMeetingList()   ---------------------------------------------------------
 
     @Test
     public void getFutureMeetingListWithNullContactsShouldThrowNullPointerException() {
@@ -626,7 +627,7 @@ public class TestContactManager {
         assertEquals(array[3].getNotes(), "Notes about the 2001 Meeting");
     }
 
-    // testing addNewPastMeeting(), getPastMeeting()   -------------------------------------------------
+    // testing addNewPastMeeting(), getPastMeeting()   ----------------------------------------------------------------
 
     @Test
     public void addNewPastMeetingWithNullContactsShouldThrowNullPointerException() {
@@ -752,7 +753,7 @@ public class TestContactManager {
         assertEquals(p2.getContacts(), set2);
     }
 
-    // testing addMeetingNotes() -----------------------------------------------------------------------
+    // testing addMeetingNotes() --------------------------------------------------------------------------------------
 
     @Test
     public void addMeetingNotesWithValidIdNullNotesShouldThrowNullPointerException() {
@@ -903,6 +904,56 @@ public class TestContactManager {
         assertEquals(list.get(2).getNotes(), "1991 Meeting");
         assertEquals(list.get(3).getNotes(), "1999 Meeting");
         assertEquals(list.get(4).getNotes(), "2000 Meeting");
+    }
+
+    /* testing flush() ------------------------------------------------------------------------------------------------
+    In order to test the flush() method and a correct serialization of data, after each JUnit methods
+    the file "Contacts.txt" is deleted (as well as a new instance of ContactManager is created).
+    This means that each method is testing a new utilization of ContactManager as started for the first time.
+    Tests for flush() are initializing a new ContactManager inside its methods, in order to test a "re-opening"
+    of a new instance while keeping the Contact.txt file for retrieving the data saved within the same single test.
+    */
+
+    @Test
+    public void openContactManagerForTheFirstTimeShouldCreateAFileContactDotTxt() {
+        assertFalse(file.exists());
+        test.flush();
+        assertTrue(file.exists());
+    }
+
+    @Test
+    public void addContactAndMeetingWithoutFlushingReopenShouldNOTGetThem() {
+        addContactsSmith(10);    // add 10 contacts named "Smith"
+        int meetingID = test.addFutureMeeting(test.getContacts("Smith"), getFutureDate());
+        test = new ContactManagerImpl();    // "open" a new instance of ContactManagerImpl
+        assertTrue(test.getContacts("Smith").isEmpty());
+        assertNull(test.getFutureMeeting(meetingID));
+    }
+
+    @Test
+    public void addContactFlushAndReopenShouldGetContactPreviouslyCreatedAndNotGettingAnUnknownOne() {
+        addContactsSmith(10);    // add 10 contacts named "Smith"
+        int meetingID = test.addFutureMeeting(test.getContacts("Smith"), getFutureDate());
+        test.flush();
+        test = new ContactManagerImpl();    // "open" a new instance of ContactManagerImpl
+        assertFalse(test.getContacts("Smith").isEmpty());
+        assertNotNull(test.getFutureMeeting(meetingID));
+        assertTrue(test.getContacts("Unknown").isEmpty());
+    }
+
+    @Test
+    public void AssignContactAndMeetingIdsCloseContactManagerOpenAndAssignOtherCheckTheyAreUnique() {
+        Contact valid = addContactgetContact();   // add a contact named "Valid"
+        int validID = valid.getId();
+        int validMeetingID = test.addFutureMeeting(test.getContacts("Valid"), getFutureDate());
+        test.flush();
+        test = new ContactManagerImpl();    // "open" a new instance of ContactManagerImpl
+        addContactsSmith(1);    // add a contact named "Smith"
+        Contact smith = test.getContacts("Smith").toArray(new Contact[1])[0];
+        int smithID = smith.getId();
+        int smithMeetingID = test.addFutureMeeting(test.getContacts("Smith"), getFutureDate());
+        assertNotEquals(validID, smithID);
+        assertNotEquals(validMeetingID, smithMeetingID);
     }
 
 }
