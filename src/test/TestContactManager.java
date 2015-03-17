@@ -932,11 +932,13 @@ public class TestContactManager {
 
     @Test
     public void addContactFlushAndReopenShouldGetContactPreviouslyCreatedAndNotGettingAnUnknownOne() {
-        addContactsSmith(10);    // add 10 contacts named "Smith"
+        addContactsSmith(2);    // add 2 contacts named "Smith"
         int meetingID = test.addFutureMeeting(test.getContacts("Smith"), getFutureDate());
         test.flush();
         test = new ContactManagerImpl();    // "open" a new instance of ContactManagerImpl
+        addContactsSmith(1);    // add 1 contact named "Smith"
         assertFalse(test.getContacts("Smith").isEmpty());
+        assertEquals(test.getContacts("Smith").size(), 3);
         assertNotNull(test.getFutureMeeting(meetingID));
         assertTrue(test.getContacts("Unknown").isEmpty());
     }
