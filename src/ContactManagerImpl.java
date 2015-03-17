@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.*;
 
 /**
@@ -6,7 +7,7 @@ import java.util.*;
  * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
 public class ContactManagerImpl implements ContactManager {
-    private IdCreatorImpl IdCreator;
+    private IdCreatorImpl idCreator;
     private Set<Contact> contactSet;
     private List<Meeting> meetings;
 
@@ -14,9 +15,20 @@ public class ContactManagerImpl implements ContactManager {
      *
      */
     public ContactManagerImpl() {
-        IdCreator = new IdCreatorImpl();
-        contactSet = new LinkedHashSet<>();
-        meetings = new LinkedList<>();
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("Contact.txt"))) {
+            idCreator = (IdCreatorImpl) in.readObject();
+            contactSet = (LinkedHashSet) in.readObject();
+            meetings = (LinkedList) in.readObject();
+        } catch (FileNotFoundException fl) {    // initialize a new ContactManager from scratch
+            idCreator = new IdCreatorImpl();
+            contactSet = new LinkedHashSet<>();
+            meetings = new LinkedList<>();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (ClassNotFoundException cl) {
+            cl.printStackTrace();
+
+        }
     }
 
     /**
@@ -119,7 +131,7 @@ public class ContactManagerImpl implements ContactManager {
         } else if(date.before(Calendar.getInstance())) {
             throw new IllegalArgumentException("Cannot create a FutureMeeting with a past date");
         } else {
-            int id = IdCreator.createMeetingId();
+            int id = idCreator.createMeetingId();
             FutureMeeting meeting = new FutureMeetingImpl(date, contacts, id);
             meetings.add(meeting);
             return id;
@@ -309,7 +321,7 @@ public class ContactManagerImpl implements ContactManager {
         } else if (!checkContacts(contacts)) {
             throw new IllegalArgumentException("All the contacts of the meeting need to be valid");
         } else {
-            int id = IdCreator.createMeetingId();
+            int id = idCreator.createMeetingId();
             PastMeeting pastMeeting = new PastMeetingImpl(date, contacts, id, text);
             meetings.add(pastMeeting);
         }
@@ -330,15 +342,15 @@ public class ContactManagerImpl implements ContactManager {
             throw new NullPointerException("Cannot have null notes");
         }
         for (Meeting m : meetings) {
-            if (m.getId() == id) {
+            if (m.getId() == id) {  // meeting is found
                 if (m.getDate().after(Calendar.getInstance())) {
                     throw new IllegalStateException("Meeting " + id + " is set for a date in the future.");
                 } else {
                     PastMeeting updated;
                     if (m instanceof PastMeeting) {
-                        if (((PastMeeting) m).getNotes().equals("")) {
+                        if (((PastMeeting) m).getNotes().equals("")) {  // PastMeeting with no notes
                             updated = new PastMeetingImpl(m.getDate(), m.getContacts(), m.getId(), text);
-                        } else {    // append new Notes after the old ones
+                        } else {    // append new notes after the old ones
                             String notes = ((PastMeeting) m).getNotes() + " " + text;
                             updated = new PastMeetingImpl(m.getDate(), m.getContacts(), m.getId(), notes);
                         }
@@ -350,7 +362,7 @@ public class ContactManagerImpl implements ContactManager {
                     return;
                 }
             }
-        }
+        }   // meeting is not found
         throw new IllegalArgumentException("The meeting does not exist");
     }
 
@@ -366,7 +378,7 @@ public class ContactManagerImpl implements ContactManager {
         if(name == null || notes == null) {
             throw new NullPointerException("Argument cannot be null");
         } else {
-            int id = IdCreator.createContactId();
+            int id = idCreator.createContactId();
             contactSet.add(new ContactImpl(name, id, notes));
         }
     }
@@ -420,12 +432,19 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     *
-     *
+     * {@inheritDoc}
      */
     @Override
     public void flush() {
-        // TODO
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("Contact.txt"))) {
+            out.writeObject(idCreator);
+            out.writeObject(contactSet);
+            out.writeObject(meetings);
+            out.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+        }
     }
 
 }
