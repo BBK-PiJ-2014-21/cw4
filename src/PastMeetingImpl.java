@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -6,7 +7,8 @@ import java.util.Set;
  *
  * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
-public class PastMeetingImpl extends MeetingImpl implements PastMeeting {
+public class PastMeetingImpl extends MeetingImpl implements Serializable, PastMeeting {
+    private static final long serialVersionUID = 1L;
     private String notes;
 
     /**

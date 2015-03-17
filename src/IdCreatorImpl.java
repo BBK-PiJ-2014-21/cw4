@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
  * Implementation of {@see IdCreator} interface. It creates ID numbers for a creation 
  * of a new Meeting and Contact. Classes using this implementation should make sure
@@ -6,7 +8,8 @@
  * 
  * @author federico.bartolomei (BBK-PiJ-2014-21) 
  */
-public class IdCreatorImpl implements IdCreator {
+public class IdCreatorImpl implements Serializable, IdCreator {
+    private static final long serialVersionUID = 1L;
     private int contactID = 999;
     private int meetingID = 0;
 

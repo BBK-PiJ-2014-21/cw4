@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
  * Implementation of interface {@see Contact}.
  * This class does check the uniqueness of the ID. This has to be guaranteed by the class which issues
@@ -6,7 +8,8 @@
  * 
  * @author federico.bartolomei (BBK-PiJ-2014-21)
  */
-public class ContactImpl implements Contact {
+public class ContactImpl implements Serializable, Contact {
+    private static final long serialVersionUID = 1L;
     private String name;
     private final int id;
     private String notes;
