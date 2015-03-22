@@ -13,7 +13,7 @@ public class PastMeetingImpl extends MeetingImpl implements Serializable, PastMe
 
     /**
      * Constructor for a past meeting without any notes.
-     * It will pass the arguments the the parent class Meeting, and the values of the notes
+     * It will pass the arguments to the parent class Meeting, and the values of the notes
      * will be the empty String.
      *
      * @param date the date of the meeting

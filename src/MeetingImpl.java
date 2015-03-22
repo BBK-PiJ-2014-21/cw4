@@ -3,10 +3,12 @@ import java.util.Calendar;
 import java.util.Set;
 
 /**
- * Implementation of interface {@see Meeting}. 
- * This class does not check the uniqueness of the ID. This has to be guaranteed by the class which issues 
- * the numbers, or by the class above that. This implementation just accepts any number given at construction
- * time as final.
+ * Implementation of interface {@see Meeting}.
+ * This class does check the uniqueness of the Meeting ID. This is guaranteed by the class which issues
+ * the numbers, and managed by the class above that (@see ContactManagerImpl). In this sense this
+ * class is dependant on the ContactManager. This implementation just accepts any number given
+ * at construction time as final. This is to make conversions between Meetings easier, being the ContactManager
+ * able to move and re-assign ID numbers.
  *
  * @author federico.bartolomei (BBK-PiJ-2014-21)
  */

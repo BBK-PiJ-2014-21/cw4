@@ -2,9 +2,10 @@ import java.io.Serializable;
 
 /**
  * Implementation of interface {@see Contact}.
- * This class does check the uniqueness of the ID. This has to be guaranteed by the class which issues
- * the numbers, or by the class above that. This implementation just accepts any number given at construction
- * time as final.
+ * This class does check the uniqueness of the ID. This is guaranteed by the class which issues
+ * the numbers, and managed by the class above that (@see ContactManagerImpl). In this sense this
+ * class is dependant on the ContactManager. This implementation just accepts any number given
+ * at construction time as final.
  * 
  * @author federico.bartolomei (BBK-PiJ-2014-21)
  */

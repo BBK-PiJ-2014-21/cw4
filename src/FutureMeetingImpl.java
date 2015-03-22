@@ -3,7 +3,7 @@ import java.util.Calendar;
 import java.util.Set;
 
 /**
- *
+ * Implementation of interface {@see FutureMeeting}
  */
 public class FutureMeetingImpl extends MeetingImpl implements Serializable, FutureMeeting {
     private static final long serialVersionUID = 1L;
