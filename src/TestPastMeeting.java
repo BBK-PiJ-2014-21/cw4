@@ -25,7 +25,7 @@ public class TestPastMeeting {
     @Before
     public void setUp() {
         contacts = new HashSet();
-        date = new GregorianCalendar(2015,10,21,10,15);
+        date = new GregorianCalendar(2010,10,21,10,15);
     }
 
     @After

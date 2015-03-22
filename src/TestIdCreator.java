@@ -39,11 +39,8 @@ public class TestIdCreator {
         int[] first = createIdArray(10);
         int[] second = createIdArray(10);
         for (int i = 0; i < first.length; i++) {
-            for (int j = 0; j < second.length; j++) {
-                assertFalse(first[i] + "!=" + second[j], first[i] != second[j]);
-            }
+            assertFalse(first[i] + "!=" + second[i], first[i] != second[i]);
         }
-
     }
         
     @Test
