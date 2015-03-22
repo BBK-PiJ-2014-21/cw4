@@ -12,7 +12,9 @@ public class ContactManagerImpl implements ContactManager {
     private List<Meeting> meetings;
 
     /**
-     *
+     * Constructor for the ContactManager. If a file called "Contact.txt" is found on the same folder,
+     * all the fields will be de-serialized to restore the last version of the ContactManager.
+     * Otherwise a new instance would start from scratch.
      */
     public ContactManagerImpl() {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("Contact.txt"))) {
@@ -61,7 +63,7 @@ public class ContactManagerImpl implements ContactManager {
     /**
      * Compare the date (year, month, day) of two Calendar instances,
      * without checking the time, and return whether the three fields are equals
-     * (i.e. if the two dates are the same, regardless of the time)
+     * (i.e. if the two dates are the same, regardless of the hours, minutes, etc.)
      *
      * @param date1 a Calendar date.
      * @param date2 a Calendar date.
@@ -142,10 +144,10 @@ public class ContactManagerImpl implements ContactManager {
      * {@inheritDoc}
      *
      * If the meeting with the requested ID has a past date but has not been converted to PastMeeting yet,
-     * it will be converted without notes.
+     * it will be converted without notes
      *
      * @param id the ID for the meeting
-     * @return the meeting with the requested ID, or null if there is none.
+     * @return the meeting with the requested ID, or null if there is none
      * @throws IllegalArgumentException if there is a meeting with that ID happening in the future
      */
     @Override
@@ -191,7 +193,7 @@ public class ContactManagerImpl implements ContactManager {
      * {@inheritDoc}
      *
      * @param id the ID for the meeting
-     * @return the meeting with the requested ID, or null if it there is none.
+     * @return the meeting with the requested ID, or null if it there is none
      */
     @Override
     public Meeting getMeeting(int id) {
@@ -208,11 +210,11 @@ public class ContactManagerImpl implements ContactManager {
      *
      * This implementation considers a contact unknown if the object is not contained into the set contactSet.
      * That is, a Contact object with matching name, id and notes passed as parameter would still throw an
-     * exception if it is not a reference of the corresponding Contact in contactSet.
+     * exception if it is not a reference of the corresponding Contact in contactSet
      *
      * @param contact one of the user's contacts
-     * @return the list of future meeting(s) scheduled with this contact (maybe empty).
-     * @throws IllegalArgumentException if the contact does not exist.
+     * @return the list of future meeting(s) scheduled with this contact (maybe empty)
+     * @throws IllegalArgumentException if the contact does not exist
      */
     @Override
     public List<Meeting> getFutureMeetingList(Contact contact) {
@@ -267,10 +269,10 @@ public class ContactManagerImpl implements ContactManager {
      * {@inheritDoc}
      *
      * If a meeting with matching contacts is a FutureMeeting with a past date,
-     * it will be converted to a PastMeeting without notes.
+     * it will be converted to a PastMeeting without notes
      *
      * @param contact one of the user’s contacts
-     * @return the list of past meeting(s) scheduled with this contact (maybe empty).
+     * @return the list of past meeting(s) scheduled with this contact (maybe empty)
      * @throws IllegalArgumentException if the contact does not exist
      */
     @Override
@@ -300,7 +302,7 @@ public class ContactManagerImpl implements ContactManager {
      * {@inheritDoc}
      *
      * This implementation throws an IllegalArgumentException also if the date
-     * as parameter is set for a future date.
+     * as parameter is set for a future date
      *
      * @param contacts a list of participants
      * @param date the date on which the meeting took place
@@ -369,9 +371,9 @@ public class ContactManagerImpl implements ContactManager {
     /**
      * {@inheritDoc}
      *
-     * @param name  the name of the contact.
-     * @param notes notes to be added about the contact.
-     * @throws NullPointerException if the name or the notes are null.
+     * @param name  the name of the contact
+     * @param notes notes to be added about the contact
+     * @throws NullPointerException if the name or the notes are null
      */
     @Override
     public void addNewContact(String name, String notes) {
@@ -440,10 +442,8 @@ public class ContactManagerImpl implements ContactManager {
             out.writeObject(idCreator);
             out.writeObject(contactSet);
             out.writeObject(meetings);
-            out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
-
         }
     }
 
