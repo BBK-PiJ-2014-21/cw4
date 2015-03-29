@@ -239,12 +239,10 @@ public class ContactManagerImpl implements ContactManager {
      *
      * The parameter date will use only the date part (year, month and day) and ignore the time.
      *
-     * Returns the list of meetings that are scheduled for, or that took
-     * place on, the specified date
-     *
-     * If there are none, the returned list will be empty. Otherwise,
-     * the list will be chronologically sorted and will not contain any
-     * duplicates.
+     * As this implementation manages the creation of meeting ids itself,
+     * "duplicate" meetings and contacts (i.e. with same id) are automatically avoided.
+     * On the other hand, this implementation does consider duplicates objects with same values
+     * (name, date, etc.), but it is based solely on the id number.
      *
      * @param date the date
      * @return the list of meetings
@@ -270,6 +268,11 @@ public class ContactManagerImpl implements ContactManager {
      *
      * If a meeting with matching contacts is a FutureMeeting with a past date,
      * it will be converted to a PastMeeting without notes
+     *
+     * As this implementation manages the creation of meeting ids itself,
+     * "duplicate" meetings and contacts (i.e. with same id) are automatically avoided.
+     * On the other hand, this implementation does consider duplicates objects with same values
+     * (name, date, etc.), but it is based solely on the id number.
      *
      * @param contact one of the user’s contacts
      * @return the list of past meeting(s) scheduled with this contact (maybe empty)
